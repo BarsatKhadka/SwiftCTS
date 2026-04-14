@@ -1,0 +1,10 @@
+{
+    "design_name": "zipdiv",
+    "aspect_ratio": 0.7,
+    "core_util": 61,
+    "density": 0.72,
+    "synth_strategy": "AREA 0",
+    "io_mode": 1,
+    "time_driven": 0,
+    "routability_driven": 0
+}

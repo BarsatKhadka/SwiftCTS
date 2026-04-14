@@ -1,0 +1,209 @@
+Reading timing models for corner nom_tt_025C_1v80…
+Reading timing library for the 'nom_tt_025C_1v80' corner at '/home/rain/.volare/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+Reading timing models for corner nom_ff_n40C_1v95…
+Reading timing library for the 'nom_ff_n40C_1v95' corner at '/home/rain/.volare/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib'…
+Reading timing models for corner nom_ss_100C_1v60…
+Reading timing library for the 'nom_ss_100C_1v60' corner at '/home/rain/.volare/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib'…
+Reading OpenROAD database at '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/09-openroad-globalplacement/aes.odb'…
+Reading design constraints file at './designs/base.sdc'…
+[INFO] No information on clock propagation in input SDC file-- propagating all clocks.
+[INFO] Setting RC values…
+[INFO RSZ-0027] Inserted 43 input buffers.
+[INFO RSZ-0028] Inserted 32 output buffers.
+[INFO RSZ-0058] Using max wire length 6335um.
+Iteration | Resized | Buffers | Nets repaired | Remaining
+---------------------------------------------------------
+        0 |       0 |       0 |             0 |     15771
+      100 |      28 |       0 |             0 |     15671
+      200 |      31 |       0 |             0 |     15571
+      300 |      34 |       0 |             0 |     15471
+      400 |      39 |       0 |             2 |     15371
+      500 |      48 |       0 |             3 |     15271
+      600 |      57 |       0 |             3 |     15171
+      700 |      60 |       0 |             3 |     15071
+      800 |      81 |       0 |             3 |     14971
+      900 |      85 |       0 |             3 |     14871
+     1000 |     105 |       0 |             3 |     14771
+     1100 |     109 |       0 |             3 |     14671
+     1200 |     137 |       0 |             3 |     14571
+     1300 |     141 |       0 |             3 |     14471
+     1400 |     205 |       0 |             3 |     14371
+     1500 |     205 |       0 |             3 |     14271
+     1600 |     206 |       0 |             3 |     14171
+     1700 |     214 |       0 |             3 |     14071
+     1800 |     215 |       0 |             3 |     13971
+     1900 |     241 |       0 |             3 |     13871
+     2000 |     306 |       0 |             3 |     13771
+     2100 |     347 |       0 |             4 |     13671
+     2200 |     427 |       0 |             4 |     13571
+     2300 |     497 |       0 |             4 |     13471
+     2400 |     572 |       0 |             5 |     13371
+     2500 |     661 |       0 |             5 |     13271
+     2600 |     752 |       0 |             5 |     13171
+     2700 |     835 |       0 |             5 |     13071
+     2800 |     926 |       0 |             5 |     12971
+     2900 |    1019 |       0 |             5 |     12871
+     3000 |    1112 |       0 |             5 |     12771
+     3100 |    1180 |       0 |             5 |     12671
+     3200 |    1265 |       0 |             5 |     12571
+     3300 |    1357 |       0 |             5 |     12471
+     3400 |    1454 |       0 |             5 |     12371
+     3500 |    1548 |       0 |             5 |     12271
+     3600 |    1642 |       0 |             5 |     12171
+     3700 |    1728 |       0 |             5 |     12071
+     3800 |    1815 |       0 |             5 |     11971
+     3900 |    1914 |       0 |             5 |     11871
+     4000 |    2000 |       0 |             5 |     11771
+     4100 |    2094 |       0 |             5 |     11671
+     4200 |    2189 |       0 |             5 |     11571
+     4300 |    2269 |       0 |             5 |     11471
+     4400 |    2359 |       0 |             5 |     11371
+     4500 |    2450 |       0 |             5 |     11271
+     4600 |    2535 |       0 |             5 |     11171
+     4700 |    2626 |       0 |             5 |     11071
+     4800 |    2718 |       0 |             5 |     10971
+     4900 |    2808 |       0 |             5 |     10871
+     5000 |    2898 |       0 |             5 |     10771
+     5100 |    2979 |       2 |             7 |     10671
+     5200 |    3079 |       2 |            20 |     10571
+     5300 |    3173 |       2 |            32 |     10471
+     5400 |    3269 |       2 |            32 |     10371
+     5500 |    3363 |       2 |            32 |     10271
+     5600 |    3451 |       2 |            32 |     10171
+     5700 |    3542 |       2 |            32 |     10071
+     5800 |    3630 |       2 |            32 |      9971
+     5900 |    3722 |       2 |            32 |      9871
+     6000 |    3814 |       2 |            32 |      9771
+     6100 |    3896 |       2 |            37 |      9671
+     6200 |    3985 |       2 |            37 |      9571
+     6300 |    4080 |       2 |            37 |      9471
+     6400 |    4176 |       2 |            37 |      9371
+     6500 |    4269 |       3 |            38 |      9271
+     6600 |    4361 |       4 |            39 |      9171
+     6700 |    4458 |       4 |            39 |      9071
+     6800 |    4547 |       4 |            39 |      8971
+     6900 |    4628 |       4 |            39 |      8871
+     7000 |    4723 |      10 |            40 |      8771
+     7100 |    4805 |      10 |            40 |      8671
+     7200 |    4890 |      10 |            40 |      8571
+     7300 |    4961 |      10 |            40 |      8471
+     7400 |    5049 |      10 |            40 |      8371
+     7500 |    5133 |      10 |            40 |      8271
+     7600 |    5229 |      10 |            40 |      8171
+     7700 |    5323 |      10 |            40 |      8071
+     7800 |    5420 |      10 |            40 |      7971
+     7900 |    5512 |      10 |            40 |      7871
+     8000 |    5550 |      11 |            41 |      7771
+     8100 |    5621 |      17 |            43 |      7671
+     8200 |    5710 |      17 |            43 |      7571
+     8300 |    5801 |      18 |            44 |      7471
+     8400 |    5879 |      18 |            44 |      7371
+     8500 |    5965 |      18 |            47 |      7271
+     8600 |    6063 |      18 |            47 |      7171
+     8700 |    6158 |      18 |            47 |      7071
+     8800 |    6253 |      18 |            47 |      6971
+     8900 |    6350 |      18 |            47 |      6871
+     9000 |    6447 |      18 |            47 |      6771
+     9100 |    6542 |      18 |            47 |      6671
+     9200 |    6637 |      18 |            47 |      6571
+     9300 |    6728 |      18 |            47 |      6471
+     9400 |    6819 |      19 |            48 |      6371
+     9500 |    6919 |      22 |            51 |      6271
+     9600 |    7018 |      24 |            53 |      6171
+     9700 |    7116 |      30 |            60 |      6071
+     9800 |    7216 |      33 |            61 |      5971
+     9900 |    7301 |      33 |            61 |      5871
+    10000 |    7396 |      33 |            61 |      5771
+    10100 |    7414 |      39 |            63 |      5671
+    10200 |    7461 |      39 |            63 |      5571
+    10300 |    7546 |      39 |            63 |      5471
+    10400 |    7634 |      39 |            63 |      5371
+    10500 |    7722 |      39 |            63 |      5271
+    10600 |    7817 |      39 |            63 |      5171
+    10700 |    7913 |      39 |            63 |      5071
+    10800 |    8011 |      39 |            63 |      4971
+    10900 |    8111 |      39 |            63 |      4871
+    11000 |    8208 |      39 |            63 |      4771
+    11100 |    8290 |      80 |            75 |      4671
+    11200 |    8389 |      87 |            76 |      4571
+    11300 |    8390 |      90 |            77 |      4471
+    11400 |    8394 |      93 |            80 |      4371
+    11500 |    8432 |      93 |            80 |      4271
+    11600 |    8532 |      93 |            80 |      4171
+    11700 |    8627 |     104 |            89 |      4071
+    11800 |    8714 |     111 |            96 |      3971
+    11900 |    8808 |     111 |            96 |      3871
+    12000 |    8885 |     170 |           108 |      3771
+    12100 |    8961 |     223 |           120 |      3671
+    12200 |    9038 |     226 |           122 |      3571
+    12300 |    9115 |     227 |           123 |      3471
+    12400 |    9208 |     227 |           123 |      3371
+    12500 |    9262 |     232 |           124 |      3271
+    12600 |    9278 |     232 |           124 |      3171
+    12700 |    9329 |     235 |           127 |      3071
+    12800 |    9427 |     235 |           127 |      2971
+    12900 |    9524 |     235 |           127 |      2871
+    13000 |    9624 |     235 |           127 |      2771
+    13100 |    9724 |     235 |           127 |      2671
+    13200 |    9824 |     235 |           127 |      2571
+    13300 |    9924 |     235 |           127 |      2471
+    13400 |   10024 |     235 |           127 |      2371
+    13500 |   10124 |     235 |           127 |      2271
+    13600 |   10224 |     235 |           127 |      2171
+    13700 |   10324 |     235 |           127 |      2071
+    13800 |   10424 |     235 |           127 |      1971
+    13900 |   10524 |     235 |           127 |      1871
+    14000 |   10624 |     235 |           127 |      1771
+    14100 |   10724 |     235 |           127 |      1671
+    14200 |   10824 |     235 |           127 |      1571
+    14300 |   10924 |     235 |           127 |      1471
+    14400 |   11024 |     235 |           127 |      1371
+    14500 |   11122 |     236 |           128 |      1271
+    14600 |   11222 |     236 |           128 |      1171
+    14700 |   11322 |     236 |           128 |      1071
+    14800 |   11420 |     236 |           128 |       971
+    14900 |   11520 |     236 |           128 |       871
+    15000 |   11620 |     236 |           128 |       771
+    15100 |   11717 |     238 |           129 |       671
+    15200 |   11816 |     238 |           129 |       571
+    15300 |   11915 |     238 |           129 |       471
+    15400 |   12013 |     238 |           129 |       371
+    15500 |   12113 |     241 |           130 |       271
+    15600 |   12213 |     243 |           131 |       171
+    15700 |   12312 |     244 |           132 |        71
+    final |   12341 |     265 |           133 |         0
+---------------------------------------------------------
+[INFO RSZ-0034] Found 133 slew violations.
+[INFO RSZ-0036] Found 76 capacitance violations.
+[INFO RSZ-0038] Inserted 265 buffers in 133 nets.
+[INFO RSZ-0039] Resized 12341 instances.
+Placement Analysis
+---------------------------------
+total displacement      47839.5 u
+average displacement        2.2 u
+max displacement           34.7 u
+original HPWL          601494.1 u
+legalized HPWL         649955.4 u
+delta HPWL                    8 %
+
+[INFO DPL-0020] Mirrored 4651 instances
+[INFO DPL-0021] HPWL before          649955.4 u
+[INFO DPL-0022] HPWL after           641108.2 u
+[INFO DPL-0023] HPWL delta               -1.4 %
+[INFO] Setting RC values…
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+Updating metrics…
+Cell type report:                       Count       Area
+  Fill cell                               376    1411.35
+  Tap cell                               5320    6656.38
+  Timing Repair Buffer                    340    4878.43
+  Inverter                                 78     379.11
+  Sequential cell                        2994   76089.23
+  Multi-Input combinational cell        12580  120561.88
+  Total                                 21688  209976.38
+Writing OpenROAD database to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/10-openroad-repairdesign/aes.odb'…
+Writing netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/10-openroad-repairdesign/aes.nl.v'…
+Writing powered netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/10-openroad-repairdesign/aes.pnl.v'…
+Writing layout to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/10-openroad-repairdesign/aes.def'…
+Writing timing constraints to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/10-openroad-repairdesign/aes.sdc'…

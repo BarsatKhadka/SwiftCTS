@@ -1,0 +1,5 @@
+Design,Golden (Clean),Marginal,Broken,TOTAL_RUNS
+aes,610,198,402,1210
+ethmac,152,1038,10,1200
+picorv32,475,125,410,1010
+sha256,443,127,640,1210

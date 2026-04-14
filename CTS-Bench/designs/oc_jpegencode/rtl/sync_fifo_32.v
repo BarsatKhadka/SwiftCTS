@@ -1,0 +1,1 @@
+../code/sync_fifo_32.v

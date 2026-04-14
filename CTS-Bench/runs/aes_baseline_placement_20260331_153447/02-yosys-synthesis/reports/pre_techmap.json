@@ -1,0 +1,63 @@
+{
+   "creator": "Yosys 0.46 (git sha1 e97731b9dda91fa5fa53ed87df7c34163ba59a41, clang++ 17.0.6 -fPIC -O3)",
+   "invocation": "stat -json -liberty /home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/tmp/3bbbcd36a6e94c179adc87eed1a47cda.lib ",
+   "modules": {
+      "\\aes": {
+         "num_wires":         20932,
+         "num_wire_bits":     24730,
+         "num_pub_wires":     103,
+         "num_pub_wire_bits": 3901,
+         "num_ports":         7,
+         "num_port_bits":     76,
+         "num_memories":      0,
+         "num_memory_bits":   0,
+         "num_processes":     0,
+         "num_cells":         24675,
+         "num_cells_by_type": {
+            "$_ANDNOT_": 6500,
+            "$_AND_": 224,
+            "$_DFFE_PN0P_": 2843,
+            "$_DFFE_PN1P_": 4,
+            "$_DFF_PN0_": 143,
+            "$_DFF_PN1_": 4,
+            "$_MUX_": 1358,
+            "$_NAND_": 229,
+            "$_NOR_": 310,
+            "$_NOT_": 488,
+            "$_ORNOT_": 565,
+            "$_OR_": 9138,
+            "$_XNOR_": 664,
+            "$_XOR_": 2205
+         }
+      }
+   },
+      "design": {
+         "num_wires":         20932,
+         "num_wire_bits":     24730,
+         "num_pub_wires":     103,
+         "num_pub_wire_bits": 3901,
+         "num_ports":         7,
+         "num_port_bits":     76,
+         "num_memories":      0,
+         "num_memory_bits":   0,
+         "num_processes":     0,
+         "num_cells":         24675,
+         "num_cells_by_type": {
+            "$_ANDNOT_": 6500,
+            "$_AND_": 224,
+            "$_DFFE_PN0P_": 2843,
+            "$_DFFE_PN1P_": 4,
+            "$_DFF_PN0_": 143,
+            "$_DFF_PN1_": 4,
+            "$_MUX_": 1358,
+            "$_NAND_": 229,
+            "$_NOR_": 310,
+            "$_NOT_": 488,
+            "$_ORNOT_": 565,
+            "$_OR_": 9138,
+            "$_XNOR_": 664,
+            "$_XOR_": 2205
+         }
+      }
+}
+

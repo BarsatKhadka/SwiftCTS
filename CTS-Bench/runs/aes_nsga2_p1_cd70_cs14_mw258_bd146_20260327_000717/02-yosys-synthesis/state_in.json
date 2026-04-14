@@ -1,0 +1,22 @@
+{
+    "nl": null,
+    "pnl": null,
+    "pnl-sdf-friendly": null,
+    "pnl-npc": null,
+    "def": null,
+    "lef": null,
+    "openroad-lef": null,
+    "odb": null,
+    "sdc": null,
+    "sdf": null,
+    "spef": null,
+    "lib": null,
+    "spice": null,
+    "mag": null,
+    "gds": null,
+    "mag_gds": null,
+    "klayout_gds": null,
+    "json_h": "/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/01-yosys-jsonheader/aes.h.json",
+    "vh": null,
+    "metrics": {}
+}

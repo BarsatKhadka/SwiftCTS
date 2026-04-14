@@ -1,0 +1,27 @@
+{
+    "nl": "/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/02-yosys-synthesis/aes.nl.v",
+    "pnl": null,
+    "pnl-sdf-friendly": null,
+    "pnl-npc": null,
+    "def": null,
+    "lef": null,
+    "openroad-lef": null,
+    "odb": null,
+    "sdc": null,
+    "sdf": null,
+    "spef": null,
+    "lib": null,
+    "spice": null,
+    "mag": null,
+    "gds": null,
+    "mag_gds": null,
+    "klayout_gds": null,
+    "json_h": "/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/01-yosys-jsonheader/aes.h.json",
+    "vh": null,
+    "metrics": {
+        "design__instance__count": 15652,
+        "design__instance__area": 213000.5344,
+        "design__instance_unmapped__count": 0,
+        "synthesis__check_error__count": 0
+    }
+}

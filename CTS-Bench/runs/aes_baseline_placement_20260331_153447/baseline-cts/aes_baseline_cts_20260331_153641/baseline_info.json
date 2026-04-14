@@ -1,0 +1,10 @@
+{
+    "design": "aes",
+    "placement_id": "aes_run_20260306_172147",
+    "placement_tag": "aes_baseline_placement_20260331_153447",
+    "actual_power_W": 0.0580883,
+    "actual_wirelength_um": 680074,
+    "actual_skew_setup_ns": 0.693618,
+    "run_tag": "aes_baseline_cts_20260331_153641",
+    "status": "ok"
+}

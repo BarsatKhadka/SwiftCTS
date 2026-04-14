@@ -1,0 +1,1 @@
+openroad -exit -no_splash -metrics /home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/06-openroad-ioplacement/or_metrics_out.json /nix/store/4ffn1gwxcnk9rkn988mgfnjnhypf04dg-python3-3.11.9-env/lib/python3.11/site-packages/openlane/scripts/openroad/ioplacer.tcl

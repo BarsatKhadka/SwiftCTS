@@ -1,0 +1,133 @@
+Reading timing models for corner nom_tt_025C_1v80…
+Reading timing library for the 'nom_tt_025C_1v80' corner at '/home/rain/.volare/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+Reading timing models for corner nom_ff_n40C_1v95…
+Reading timing library for the 'nom_ff_n40C_1v95' corner at '/home/rain/.volare/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib'…
+Reading timing models for corner nom_ss_100C_1v60…
+Reading timing library for the 'nom_ss_100C_1v60' corner at '/home/rain/.volare/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib'…
+Reading OpenROAD database at '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/11-openroad-detailedplacement/aes.odb'…
+Reading design constraints file at './designs/base.sdc'…
+[INFO] No information on clock propagation in input SDC file-- propagating all clocks.
+[INFO] Setting RC values…
+[INFO] Configuring cts characterization…
+[INFO] Performing clock tree synthesis…
+[INFO] Looking for the following net(s): clk
+[INFO] Running Clock Tree Synthesis…
+[INFO CTS-0050] Root buffer is sky130_fd_sc_hd__clkbuf_16.
+[INFO CTS-0051] Sink buffer is sky130_fd_sc_hd__clkbuf_8.
+[INFO CTS-0052] The following clock buffers will be used for CTS:
+                    sky130_fd_sc_hd__clkbuf_2
+                    sky130_fd_sc_hd__clkbuf_4
+                    sky130_fd_sc_hd__clkbuf_8
+[INFO CTS-0049] Characterization buffer is sky130_fd_sc_hd__clkbuf_8.
+[INFO CTS-0007] Net "clk" found for clock "clk".
+[INFO CTS-0010]  Clock net "clk" has 2994 sinks.
+[INFO CTS-0008] TritonCTS found 1 clock nets.
+[INFO CTS-0097] Characterization used 3 buffer(s) types.
+[INFO CTS-0200] 0 placement blockages have been identified.
+[INFO CTS-0201] 0 placed hard macros will be treated like blockages.
+[INFO CTS-0027] Generating H-Tree topology for net clk.
+[INFO CTS-0028]  Total number of sinks: 2994.
+[INFO CTS-0029]  Sinks will be clustered in groups of up to 14 and with maximum cluster diameter of 70.0 um.
+[INFO CTS-0030]  Number of static layers: 0.
+[INFO CTS-0020]  Wire segment unit: 13600  dbu (13 um).
+[INFO CTS-0021]  Distance between buffers: 5 units (146 um).
+[INFO CTS-0204] A clustering solution was found from clustering size of 14 and clustering diameter of 70.
+[INFO CTS-0205] Better solution may be possible if either -sink_clustering_size, -sink_clustering_max_diameter, or both options are omitted to enable automatic clustering.
+[INFO CTS-0019]  Total number of sinks after clustering: 222.
+[INFO CTS-0024]  Normalized sink region: [(2.05331, 10.2845), (45.6225, 47.5727)].
+[INFO CTS-0025]     Width:  43.5692.
+[INFO CTS-0026]     Height: 37.2882.
+ Level 1
+    Direction: Horizontal
+    Sinks per sub-region: 111
+    Sub-region size: 21.7846 X 37.2882
+[INFO CTS-0034]     Segment length (rounded): 10.
+ Level 2
+    Direction: Vertical
+    Sinks per sub-region: 56
+    Sub-region size: 21.7846 X 18.6441
+[INFO CTS-0034]     Segment length (rounded): 10.
+ Level 3
+    Direction: Horizontal
+    Sinks per sub-region: 28
+    Sub-region size: 10.8923 X 18.6441
+[INFO CTS-0034]     Segment length (rounded): 6.
+ Level 4
+    Direction: Vertical
+    Sinks per sub-region: 14
+    Sub-region size: 10.8923 X 9.3221
+[INFO CTS-0034]     Segment length (rounded): 4.
+[INFO CTS-0032]  Stop criterion found. Max number of sinks is 15.
+[INFO CTS-0035]  Number of sinks covered: 222.
+[INFO CTS-0018]     Created 245 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 5.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 5.
+[INFO CTS-0015]     Created 245 clock nets.
+[INFO CTS-0016]     Fanout distribution for the current clock = 2:1, 4:3, 5:1, 6:3, 8:2, 9:2, 10:4, 11:3, 12:4, 13:7, 14:202, 15:2, 16:1, 17:1, 19:1, 23:1..
+[INFO CTS-0017]     Max level of the clock tree: 4.
+[INFO CTS-0098] Clock net "clk"
+[INFO CTS-0099]  Sinks 3091
+[INFO CTS-0100]  Leaf buffers 222
+[INFO CTS-0101]  Average sink wire length 830.27 um
+[INFO CTS-0102]  Path depth 4 - 5
+[INFO CTS-0207]  Leaf load cells 97
+[INFO] Repairing long wires on clock nets…
+[WARNING RSZ-0065] max wire length less than 6335u increases wire delays.
+[INFO RSZ-0047] Found 1 long wires.
+[INFO RSZ-0048] Inserted 1 buffers in 1 nets.
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+Updating metrics…
+Cell type report:                       Count       Area
+  Fill cell                               478    1794.22
+  Tap cell                               6025    7538.48
+  Clock buffer                            319    3961.30
+  Timing Repair Buffer                    322    4629.44
+  Inverter                                 78     376.61
+  Clock inverter                           24     280.27
+  Sequential cell                        2994   76102.99
+  Multi-Input combinational cell        12580  120077.66
+  Total                                 22820  214760.97
+Writing OpenROAD database to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.odb'…
+Writing netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.nl.v'…
+Writing powered netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.pnl.v'…
+Writing layout to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.def'…
+Writing timing constraints to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.sdc'…
+[INFO] Legalizing…
+Placement Analysis
+---------------------------------
+total displacement       2919.5 u
+average displacement        0.1 u
+max displacement           16.1 u
+original HPWL          653527.3 u
+legalized HPWL         664088.3 u
+delta HPWL                    2 %
+
+[INFO DPL-0020] Mirrored 4547 instances
+[INFO DPL-0021] HPWL before          664088.3 u
+[INFO DPL-0022] HPWL after           655064.1 u
+[INFO DPL-0023] HPWL delta               -1.4 %
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+Updating metrics…
+Cell type report:                       Count       Area
+  Fill cell                               478    1794.22
+  Tap cell                               6025    7538.48
+  Clock buffer                            319    3961.30
+  Timing Repair Buffer                    322    4629.44
+  Inverter                                 78     376.61
+  Clock inverter                           24     280.27
+  Sequential cell                        2994   76102.99
+  Multi-Input combinational cell        12580  120077.66
+  Total                                 22820  214760.97
+Writing OpenROAD database to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.odb'…
+Writing netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.nl.v'…
+Writing powered netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.pnl.v'…
+Writing layout to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.def'…
+Writing timing constraints to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_nsga2_p1_cd70_cs14_mw258_bd146_20260327_000717/13-openroad-cts/aes.sdc'…
+%OL_CREATE_REPORT cts.rpt
+[INFO CTS-0003] Total number of Clock Roots: 1.
+[INFO CTS-0004] Total number of Buffers Inserted: 245.
+[INFO CTS-0005] Total number of Clock Subnets: 245.
+[INFO CTS-0006] Total number of Sinks: 2994.
+%OL_END_REPORT

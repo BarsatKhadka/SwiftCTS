@@ -1,0 +1,135 @@
+Reading timing models for corner nom_tt_025C_1v80…
+Reading timing library for the 'nom_tt_025C_1v80' corner at '/home/rain/.volare/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+Reading timing models for corner nom_ff_n40C_1v95…
+Reading timing library for the 'nom_ff_n40C_1v95' corner at '/home/rain/.volare/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib'…
+Reading timing models for corner nom_ss_100C_1v60…
+Reading timing library for the 'nom_ss_100C_1v60' corner at '/home/rain/.volare/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib'…
+Reading OpenROAD database at '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/final/odb/aes.odb'…
+Reading design constraints file at './designs/base.sdc'…
+[INFO] No information on clock propagation in input SDC file-- propagating all clocks.
+[INFO] Setting RC values…
+[INFO] Configuring cts characterization…
+[INFO] Performing clock tree synthesis…
+[INFO] Looking for the following net(s): clk
+[INFO] Running Clock Tree Synthesis…
+[INFO CTS-0050] Root buffer is sky130_fd_sc_hd__clkbuf_16.
+[INFO CTS-0051] Sink buffer is sky130_fd_sc_hd__clkbuf_8.
+[INFO CTS-0052] The following clock buffers will be used for CTS:
+                    sky130_fd_sc_hd__clkbuf_2
+                    sky130_fd_sc_hd__clkbuf_4
+                    sky130_fd_sc_hd__clkbuf_8
+[INFO CTS-0049] Characterization buffer is sky130_fd_sc_hd__clkbuf_8.
+[INFO CTS-0007] Net "clk" found for clock "clk".
+[INFO CTS-0010]  Clock net "clk" has 2994 sinks.
+[INFO CTS-0008] TritonCTS found 1 clock nets.
+[INFO CTS-0097] Characterization used 3 buffer(s) types.
+[INFO CTS-0200] 0 placement blockages have been identified.
+[INFO CTS-0201] 0 placed hard macros will be treated like blockages.
+[INFO CTS-0027] Generating H-Tree topology for net clk.
+[INFO CTS-0028]  Total number of sinks: 2994.
+[INFO CTS-0029]  Sinks will be clustered in groups of up to 25 and with maximum cluster diameter of 50.0 um.
+[INFO CTS-0030]  Number of static layers: 0.
+[INFO CTS-0020]  Wire segment unit: 13600  dbu (13 um).
+[INFO CTS-0204] A clustering solution was found from clustering size of 25 and clustering diameter of 50.
+[INFO CTS-0205] Better solution may be possible if either -sink_clustering_size, -sink_clustering_max_diameter, or both options are omitted to enable automatic clustering.
+[INFO CTS-0019]  Total number of sinks after clustering: 227.
+[INFO CTS-0024]  Normalized sink region: [(0.905047, 2.35186), (41.6901, 36.6222)].
+[INFO CTS-0025]     Width:  40.7850.
+[INFO CTS-0026]     Height: 34.2704.
+ Level 1
+    Direction: Horizontal
+    Sinks per sub-region: 114
+    Sub-region size: 20.3925 X 34.2704
+[INFO CTS-0034]     Segment length (rounded): 10.
+ Level 2
+    Direction: Vertical
+    Sinks per sub-region: 57
+    Sub-region size: 20.3925 X 17.1352
+[INFO CTS-0034]     Segment length (rounded): 8.
+ Level 3
+    Direction: Horizontal
+    Sinks per sub-region: 29
+    Sub-region size: 10.1963 X 17.1352
+[INFO CTS-0034]     Segment length (rounded): 6.
+ Level 4
+    Direction: Vertical
+    Sinks per sub-region: 15
+    Sub-region size: 10.1963 X 8.5676
+[INFO CTS-0034]     Segment length (rounded): 4.
+ Level 5
+    Direction: Horizontal
+    Sinks per sub-region: 8
+    Sub-region size: 5.0981 X 8.5676
+[INFO CTS-0034]     Segment length (rounded): 2.
+[INFO CTS-0032]  Stop criterion found. Max number of sinks is 15.
+[INFO CTS-0035]  Number of sinks covered: 227.
+[INFO CTS-0018]     Created 265 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 3.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 4.
+[INFO CTS-0015]     Created 265 clock nets.
+[INFO CTS-0016]     Fanout distribution for the current clock = 2:3, 3:1, 4:4, 5:5, 6:13, 7:12, 8:22, 9:22, 10:20, 11:24, 12:15, 13:17, 14:13, 15:9, 16:11, 17:15, 18:10, 19:8, 20:12, 21:5, 22:7, 23:5, 24:2, 25:1..
+[INFO CTS-0017]     Max level of the clock tree: 5.
+[INFO CTS-0098] Clock net "clk"
+[INFO CTS-0099]  Sinks 3208
+[INFO CTS-0100]  Leaf buffers 224
+[INFO CTS-0101]  Average sink wire length 963.93 um
+[INFO CTS-0102]  Path depth 3 - 4
+[INFO CTS-0207]  Leaf load cells 214
+[INFO] Repairing long wires on clock nets…
+[INFO RSZ-0058] Using max wire length 6335um.
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+Updating metrics…
+Cell type report:                       Count       Area
+  Fill cell                               376    1411.35
+  Tap cell                               5320    6656.38
+  Clock buffer                            290    4306.63
+  Timing Repair Buffer                    340    4878.43
+  Inverter                                 78     379.11
+  Clock inverter                          189    2335.99
+  Sequential cell                        2994   76089.23
+  Multi-Input combinational cell        12580  120561.88
+  Total                                 22167  216619.00
+Writing OpenROAD database to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.odb'…
+Writing netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.nl.v'…
+Writing powered netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.pnl.v'…
+Writing layout to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.def'…
+Writing timing constraints to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.sdc'…
+[INFO] Legalizing…
+Placement Analysis
+---------------------------------
+total displacement      10981.5 u
+average displacement        0.5 u
+max displacement           27.6 u
+original HPWL          659983.3 u
+legalized HPWL         680074.3 u
+delta HPWL                    3 %
+
+[INFO DPL-0020] Mirrored 5009 instances
+[INFO DPL-0021] HPWL before          680074.3 u
+[INFO DPL-0022] HPWL after           669985.0 u
+[INFO DPL-0023] HPWL delta               -1.5 %
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+Updating metrics…
+Cell type report:                       Count       Area
+  Fill cell                               376    1411.35
+  Tap cell                               5320    6656.38
+  Clock buffer                            290    4306.63
+  Timing Repair Buffer                    340    4878.43
+  Inverter                                 78     379.11
+  Clock inverter                          189    2335.99
+  Sequential cell                        2994   76089.23
+  Multi-Input combinational cell        12580  120561.88
+  Total                                 22167  216619.00
+Writing OpenROAD database to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.odb'…
+Writing netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.nl.v'…
+Writing powered netlist to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.pnl.v'…
+Writing layout to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.def'…
+Writing timing constraints to '/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/baseline-cts/aes_baseline_cts_20260331_153641/1-openroad-cts/aes.sdc'…
+%OL_CREATE_REPORT cts.rpt
+[INFO CTS-0003] Total number of Clock Roots: 1.
+[INFO CTS-0004] Total number of Buffers Inserted: 265.
+[INFO CTS-0005] Total number of Clock Subnets: 265.
+[INFO CTS-0006] Total number of Sinks: 2994.
+%OL_END_REPORT

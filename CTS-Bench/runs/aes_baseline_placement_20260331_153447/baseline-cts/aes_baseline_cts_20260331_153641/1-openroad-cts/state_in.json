@@ -1,0 +1,22 @@
+{
+    "odb": "/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/final/odb/aes.odb",
+    "def": "/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/final/def/aes.def",
+    "nl": "/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/final/nl/aes.nl.v",
+    "pnl": "/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/final/pnl/aes.pnl.v",
+    "json_h": "/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/final/json_h/aes.h.json",
+    "sdc": "/home/rain/CTS-Task-Aware-Clustering/CTS-Bench/runs/aes_baseline_placement_20260331_153447/final/sdc/aes.sdc",
+    "pnl-sdf-friendly": null,
+    "pnl-npc": null,
+    "lef": null,
+    "openroad-lef": null,
+    "sdf": null,
+    "spef": null,
+    "lib": null,
+    "spice": null,
+    "mag": null,
+    "gds": null,
+    "mag_gds": null,
+    "klayout_gds": null,
+    "vh": null,
+    "metrics": {}
+}
