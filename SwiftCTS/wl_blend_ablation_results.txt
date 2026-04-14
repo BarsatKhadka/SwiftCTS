@@ -1,0 +1,38 @@
+WL Blend Ablation Results
+=================================================================
+
+Blend: pred_wl = exp(alpha*lgb + (1-alpha)*ridge) * wl_norm
+alpha=1.0 = pure LGB; alpha=0.0 = pure Ridge
+3-seed LODO across aes, ethmac, picorv32, sha256
+
+MAPE TABLE:
+ alpha         label      aes   ethmac   picorv32   sha256     MEAN
+-----------------------------------------------------------------
+   0.0    Ridge-only    20.3%    21.9%       5.8%     8.6%    14.1%
+   0.1     blend-0.1    21.9%    17.3%       5.7%     6.1%    12.7%
+   0.3     blend-0.3    24.9%     8.2%       5.7%     5.1%    11.0%
+   0.5     blend-0.5    27.8%     7.1%       5.8%     9.4%    12.5%
+   0.7     blend-0.7    30.5%    17.5%       6.1%    16.0%    17.5%
+   0.9     blend-0.9    33.1%    31.2%       6.4%    23.6%    23.6%
+   1.0      LGB-only    34.4%    38.9%       6.5%    27.8%    26.9%
+
+Best alpha: 0.3  mean MAPE: 11.0%
+
+WHY RIDGE IS NECESSARY (ETH MAC):
+ETH MAC is the largest training design (10,546 FFs). When held out,
+the LGB model trained on smaller designs (1,597-5,000 FFs) must
+extrapolate to a larger design. LGB trees are bounded by their leaf
+values from training data — they cannot extrapolate beyond what they
+have seen. Ridge, being a linear model, can smoothly interpolate/
+extrapolate along the feature dimensions that correlate with WL.
+The Ridge component anchors the prediction for ETH MAC.
+
+WHY LGB-ONLY WORKS FOR JPEG OOD:
+JPEG has n_ff=14,606 — 1.38x larger than training max (ETH MAC 10,546).
+Ridge extrapolates LINEARLY beyond training range, predicting
+log(wl/norm) = 21.9 vs training range [2.24, 3.61] — catastrophic.
+LGB predictions are bounded by leaf values from training data,
+so they remain in a reasonable range even for OOD sizes.
+The adaptive blend (LGB-only for n_ff > 13,710) exploits this:
+Ridge's linear extrapolation is an asset for mild OOD (ETH MAC held out)
+but a liability for extreme OOD (jpeg, 3x larger than training max).
