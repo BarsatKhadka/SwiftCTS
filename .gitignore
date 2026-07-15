@@ -1,1 +1,23 @@
 *.saif
+
+# Paper and rebuttal files
+PAPER.pdf
+REBUTTAL.md
+REBUTTAL_PLAN.md
+REVIEWER_FEEDBACK.md
+SwiftCTS/rebuttal_*.py
+SwiftCTS/rebuttal_outputs/
+
+# CTS-Bench runtime artifacts
+CTS-Bench/runs/
+CTS-Bench/pipeline.log
+CTS-Bench/latest_run.txt
+CTS-Bench/latest_stats.json
+CTS-Bench/tmp_ol_config.json
+CTS-Bench/**/*.vcd
+CTS-Bench/**/*.out
+CTS-Bench/hpc/venv/
+CTS-Bench/hpc/logs/
+CTS-Bench/scripts/__pycache__/
+CTS-Bench/hpc/scripts/__pycache__/
+dataset_with_def/shards/

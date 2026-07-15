@@ -74,7 +74,7 @@ initial begin
 end
 
 // --- 2. CORE INSTANTIATION ---
-ethmac ethtop (
+eth_top ethtop (
   .wb_clk_i(WB_CLK_I), .wb_rst_i(WB_RST_I), .wb_dat_i(WB_DAT_I), .wb_dat_o(WB_DAT_O), 
   .wb_adr_i(WB_ADR_I[11:2]), .wb_sel_i(WB_SEL_I), .wb_we_i(WB_WE_I), .wb_cyc_i(WB_CYC_I), 
   .wb_stb_i(WB_STB_I), .wb_ack_o(WB_ACK_O), .wb_err_o(WB_ERR_O), 
