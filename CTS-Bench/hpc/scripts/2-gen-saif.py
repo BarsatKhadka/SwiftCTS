@@ -20,7 +20,7 @@ FILENAME       = sys.argv[1]
 
 DESIGN_CONFIG = {
     "picorv32":  {"tb_file": "testbench.v",       "vcd_file": "testbench.vcd",      "needs_firmware": True},
-    "aes":       {"tb_file": "tb_aes.v",           "vcd_file": "tb_aes.vcd",         "needs_firmware": False},
+    "aes":       {"tb_file": "tb_aes.v",             "vcd_file": "tb_aes.vcd",         "needs_firmware": False},
     "ethmac":    {"tb_file": "tb_eth_top.v",       "vcd_file": "testbench.vcd",      "needs_firmware": False},
     "sha256":    {"tb_file": "tb_sha256.v",        "vcd_file": "tb_sha256.vcd",      "needs_firmware": False},
     "zipdiv":    {"tb_file": "tb_zipdiv.v",        "vcd_file": "tb_zipdiv.vcd",      "needs_firmware": False},
@@ -81,11 +81,13 @@ SING_PREFIX = [
 
 def run(cmd, cwd=None):
     print(f"[RUN] {' '.join(cmd)}")
-    result = subprocess.run(cmd, cwd=cwd, check=True, text=True, capture_output=True)
+    result = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
     if result.stdout:
         print(result.stdout)
     if result.stderr:
         print(result.stderr)
+    if result.returncode != 0:
+        raise subprocess.CalledProcessError(result.returncode, cmd)
 
 
 # 1. Compile with iverilog (inside Singularity — no host install required)
