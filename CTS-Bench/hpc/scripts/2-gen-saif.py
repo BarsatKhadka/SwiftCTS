@@ -70,11 +70,19 @@ RTL_INCLUDE = os.path.join(DESIGN_SRC_DIR, "rtl")
 
 DESIGNS_WITH_INCLUDES = {"ethmac", "i2c", "usb_phy", "mem_ctrl", "wb_dma", "ac97_ctrl", "pci"}
 
-# Singularity wrapper — bind CTS_BENCH_ROOT so all file paths resolve inside container
-SING_PREFIX = [
+# iverilog uses absolute paths — any --pwd works
+SING_PREFIX_COMPILE = [
     CONTAINER_CMD, "exec",
     "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
     "--pwd",  CTS_BENCH_ROOT,
+    OPENLANE_SIF,
+]
+
+# vvp writes $dumpfile with a relative path — must set --pwd to RUN_DIR
+SING_PREFIX_SIM = [
+    CONTAINER_CMD, "exec",
+    "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
+    "--pwd",  RUN_DIR,
     OPENLANE_SIF,
 ]
 
@@ -91,19 +99,19 @@ def run(cmd, cwd=None):
 
 
 # 1. Compile with iverilog (inside Singularity — no host install required)
-iverilog_cmd = SING_PREFIX + ["iverilog", "-o", SIM_EXEC, "-DFUNCTIONAL", "-DUNIT_DELAY=#1"]
+iverilog_cmd = SING_PREFIX_COMPILE + ["iverilog", "-o", SIM_EXEC, "-DFUNCTIONAL", "-DUNIT_DELAY=#1"]
 if DESIGN_NAME in DESIGNS_WITH_INCLUDES:
     iverilog_cmd += ["-I", TB_INCLUDE, "-I", RTL_INCLUDE]
 iverilog_cmd += [TESTBENCH_PATH, NETLIST_PATH, PRIMITIVES_PATH, SKY130_PATH]
 run(iverilog_cmd)
 
-# 2. Simulate with vvp (inside Singularity)
-vvp_cmd = SING_PREFIX + ["vvp", SIM_EXEC, "+vcd"]
+# 2. Simulate with vvp (inside Singularity — pwd=RUN_DIR so $dumpfile lands there)
+vvp_cmd = SING_PREFIX_SIM + ["vvp", SIM_EXEC, "+vcd"]
 if cfg["needs_firmware"]:
     if not os.path.exists(FIRMWARE_PATH):
         sys.exit(f"[ERROR] Firmware not found: {FIRMWARE_PATH}")
     vvp_cmd.append(f"+firmware={FIRMWARE_PATH}")
-run(vvp_cmd, cwd=RUN_DIR)
+run(vvp_cmd)
 
 # 3. VCD → SAIF (Python-native, runs on host — no container needed)
 run(["python3", WAVE2SAIF_PATH, "-o", SAIF_FILE, VCD_FILE])
