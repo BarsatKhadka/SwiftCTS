@@ -16,7 +16,7 @@
 # =============================================================================
 
 #SBATCH --job-name=ctsbench
-#SBATCH --partition=cpu                  # ← adjust to your cluster partition
+#SBATCH --partition=cpuq                 # ← adjust to your cluster partition
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=06:00:00                  # 6h per task (jpeg CTS is slowest ~1.5h)
