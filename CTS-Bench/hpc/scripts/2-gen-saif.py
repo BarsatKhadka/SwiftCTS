@@ -105,6 +105,9 @@ if DESIGN_NAME in DESIGNS_WITH_INCLUDES:
 iverilog_cmd += [TESTBENCH_PATH, NETLIST_PATH, PRIMITIVES_PATH, SKY130_PATH]
 run(iverilog_cmd)
 
+if not os.path.exists(SIM_EXEC):
+    sys.exit(f"[ERROR] iverilog returned 0 but {SIM_EXEC} was not created (silent compile failure)")
+
 # 2. Simulate with vvp (inside Singularity — pwd=RUN_DIR so $dumpfile lands there)
 vvp_cmd = SING_PREFIX_SIM + ["vvp", SIM_EXEC, "+vcd"]
 if cfg["needs_firmware"]:
