@@ -33,15 +33,7 @@ export SKY130_PDK="${PDK_ROOT}/volare/sky130/versions/${PDK_HASH}"
 # Path to the OpenLane 2.3.10 singularity image (pull once with setup.sh)
 export OPENLANE_SIF="${OPENLANE_SIF:-${HOME}/singularity/openlane2-2.3.10.sif}"
 
-# ── Python ────────────────────────────────────────────────────────────────────
-# Virtual-env with openlane python package installed (pip install openlane==2.3.10)
-export VENV_DIR="${CTS_BENCH_ROOT}/hpc/venv"
-
 # ── Convenience ───────────────────────────────────────────────────────────────
 export HPC_SCRIPTS="${CTS_BENCH_ROOT}/hpc/scripts"
 export HPC_SLURM="${CTS_BENCH_ROOT}/hpc/slurm"
-
-# Activate venv if it exists (safe to call multiple times)
-if [ -f "${VENV_DIR}/bin/activate" ]; then
-    source "${VENV_DIR}/bin/activate"
-fi
+# Note: no Python venv needed — openlane runs inside the Singularity container

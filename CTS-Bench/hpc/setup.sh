@@ -1,24 +1,23 @@
 #!/usr/bin/env bash
 # =============================================================================
-# One-time HPC setup — run this once after cloning CTS-Bench on the cluster.
-# Usage: bash ~/CTS-Bench/hpc/setup.sh
+# One-time HPC setup — run this once after cloning on the cluster.
+# Usage: bash ~/SwiftCTS/CTS-Bench/hpc/setup.sh
+#
+# Host only needs: python3, singularity, pip
+# openlane runs INSIDE the Singularity container — no host install needed.
 # =============================================================================
 set -euo pipefail
 source "$(dirname "$0")/env.sh"
 
 echo "=== CTS-Bench HPC Setup ==="
+echo "    CTS_BENCH_ROOT : ${CTS_BENCH_ROOT}"
+echo "    OPENLANE_SIF   : ${OPENLANE_SIF}"
+echo "    SKY130_PDK     : ${SKY130_PDK}"
+echo "    DATASET_ROOT   : ${DATASET_ROOT}"
+echo ""
 
-# ── 1. Python venv + openlane package ─────────────────────────────────────────
-echo "[1/4] Creating Python venv at ${VENV_DIR}..."
-module load python 2>/dev/null || true   # adjust module name for your cluster
-python3 -m venv "${VENV_DIR}"
-source "${VENV_DIR}/bin/activate"
-pip install --upgrade pip -q
-pip install openlane==2.3.10 -q
-echo "      openlane installed: $(python3 -c 'import openlane; print(openlane.__version__)')"
-
-# ── 2. Singularity image ──────────────────────────────────────────────────────
-echo "[2/4] Pulling OpenLane 2.3.10 Singularity image..."
+# ── 1. Singularity image ──────────────────────────────────────────────────────
+echo "[1/3] Pulling OpenLane 2.3.10 Singularity image (~5GB)..."
 mkdir -p "$(dirname "${OPENLANE_SIF}")"
 if [ ! -f "${OPENLANE_SIF}" ]; then
     singularity pull "${OPENLANE_SIF}" docker://ghcr.io/efabless/openlane2:2.3.10
@@ -27,20 +26,21 @@ else
     echo "      Already exists, skipping."
 fi
 
-# ── 3. Sky130A PDK via volare ─────────────────────────────────────────────────
-echo "[3/4] Installing Sky130A PDK (hash ${PDK_HASH})..."
+# ── 2. Sky130A PDK via volare ─────────────────────────────────────────────────
+# volare is a lightweight pip package — works on any Python version (no C build)
+echo "[2/3] Installing Sky130A PDK (hash ${PDK_HASH})..."
 mkdir -p "${PDK_ROOT}"
 pip install volare -q
 volare enable --pdk sky130 --pdk-root "${PDK_ROOT}" "${PDK_HASH}"
 echo "      PDK at ${SKY130_PDK}"
 
-# ── 4. Dataset output dirs ────────────────────────────────────────────────────
-echo "[4/4] Creating dataset directories..."
+# ── 3. Dataset output dirs ────────────────────────────────────────────────────
+echo "[3/3] Creating dataset directories..."
 mkdir -p "${DATASET_ROOT}/placement_files"
 mkdir -p "${SHARDS_DIR}"
 mkdir -p "${CTS_BENCH_ROOT}/hpc/logs"
 
 echo ""
 echo "=== Setup complete ==="
-echo "Source env.sh in your jobs:  source ${CTS_BENCH_ROOT}/hpc/env.sh"
-echo "Submit array job:             sbatch ${CTS_BENCH_ROOT}/hpc/slurm/run_array.sbatch"
+echo "Submit array job:  sbatch ${CTS_BENCH_ROOT}/hpc/slurm/run_array.sbatch"
+echo "After jobs finish: python3 ${CTS_BENCH_ROOT}/hpc/slurm/merge_csvs.py"
