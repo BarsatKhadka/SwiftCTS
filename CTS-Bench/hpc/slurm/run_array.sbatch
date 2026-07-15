@@ -25,7 +25,7 @@
 #SBATCH --time=06:00:00                  # 6h per task (jpeg CTS is slowest ~1.5h)
 #SBATCH --array=0-199                    # 200 tasks → 200×5×10 = 10,000 rows
 #SBATCH --output=%x_%A_%a.out
-#SBATCH --error=%x_%A_%a.err
+#SBATCH --error=%x_%A_%a.out
 
 # ── One-time customisation ────────────────────────────────────────────────────
 ITERS_PER_TASK=5    # pipeline iterations each task runs
