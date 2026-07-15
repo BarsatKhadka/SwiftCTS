@@ -196,24 +196,29 @@ def run_iteration(task_id, design_name):
 
     placement_id = None
     try:
-        # 1. Placement (Singularity-based OpenLane)
-        print(f"[{design_name}] Placement...")
-        r = subprocess.run([
-            "python3",
-            os.path.join(CTS_BENCH_ROOT, "hpc", "scripts", "1-gen-placement.py"),
-            design_name, str(clock_period), clock_port, top_module, str(max_core_util),
-        ], cwd=CTS_BENCH_ROOT, capture_output=True, text=True)
-        print(r.stdout)
-        if r.stderr:
-            print(r.stderr, file=sys.stderr)
-        if r.returncode != 0:
-            print(f"Placement failed. Skipping."); return
+        # 1. Placement — retry up to 3x (different random strategy each attempt)
         placement_id = None
-        for line in (r.stdout or "").splitlines():
-            if line.startswith("PLACEMENT_TAG="):
-                placement_id = line.split("=", 1)[1].strip()
+        for attempt in range(1, 4):
+            print(f"[{design_name}] Placement (attempt {attempt}/3)...")
+            r = subprocess.run([
+                "python3",
+                os.path.join(CTS_BENCH_ROOT, "hpc", "scripts", "1-gen-placement.py"),
+                design_name, str(clock_period), clock_port, top_module, str(max_core_util),
+            ], cwd=CTS_BENCH_ROOT, capture_output=True, text=True)
+            print(r.stdout)
+            if r.stderr:
+                print(r.stderr, file=sys.stderr)
+            if r.returncode != 0:
+                print(f"Placement attempt {attempt} failed (exit {r.returncode}).")
+                continue
+            for line in (r.stdout or "").splitlines():
+                if line.startswith("PLACEMENT_TAG="):
+                    placement_id = line.split("=", 1)[1].strip()
+            if placement_id:
+                break
+            print(f"No PLACEMENT_TAG on attempt {attempt}.")
         if not placement_id:
-            print("No PLACEMENT_TAG in placement stdout. Skipping."); return
+            print(f"Placement failed after 3 attempts. Skipping."); return
 
         dp = glob.glob(os.path.join(CTS_BENCH_ROOT, "runs", placement_id, "*-openroad-detailedplacement"))
         if not dp:
