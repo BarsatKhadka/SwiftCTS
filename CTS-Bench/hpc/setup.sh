@@ -21,25 +21,31 @@ echo "[1/3] Pulling OpenLane 2.3.10 Singularity image (~5GB, may take 30-60 min)
 mkdir -p "$(dirname "${OPENLANE_SIF}")"
 
 # Use $HOME/tmp as TMPDIR — avoids /tmp quota issues on shared clusters
+export APPTAINER_TMPDIR="${HOME}/tmp"
 export SINGULARITY_TMPDIR="${HOME}/tmp"
-mkdir -p "${SINGULARITY_TMPDIR}"
+export APPTAINER_CACHEDIR="${HOME}/apptainer_cache"
+mkdir -p "${APPTAINER_TMPDIR}" "${APPTAINER_CACHEDIR}"
 
-# Use apptainer if available (it's Singularity's successor and more reliable)
+# Disable HTTP/2 — apptainer is Go-based; GODEBUG=http2client=0 forces HTTP/1.1
+# which avoids the "stream error: PROTOCOL_ERROR" from ghcr.io on HPC networks
+export GODEBUG=http2client=0
+
+# Use apptainer if available (it's Singularity's successor on this cluster)
 PULL_CMD="singularity"
 command -v apptainer &>/dev/null && PULL_CMD="apptainer"
-echo "      Using: ${PULL_CMD}"
+echo "      Using: ${PULL_CMD} (HTTP/2 disabled via GODEBUG)"
 
 if [ ! -f "${OPENLANE_SIF}" ]; then
-    # Retry up to 3 times — ghcr.io sometimes drops large downloads mid-stream
-    for attempt in 1 2 3; do
-        echo "      Attempt ${attempt}/3..."
+    # Retry up to 5 times — large image, network can be flaky
+    for attempt in 1 2 3 4 5; do
+        echo "      Attempt ${attempt}/5..."
         if ${PULL_CMD} pull --force "${OPENLANE_SIF}" docker://ghcr.io/efabless/openlane2:2.3.10; then
             echo "      Saved to ${OPENLANE_SIF}"
             break
         fi
-        [ "${attempt}" -lt 3 ] && echo "      Failed, retrying in 10s..." && sleep 10
+        [ "${attempt}" -lt 5 ] && echo "      Failed, retrying in 15s..." && sleep 15
     done
-    [ ! -f "${OPENLANE_SIF}" ] && echo "ERROR: Failed to pull SIF after 3 attempts." && exit 1
+    [ ! -f "${OPENLANE_SIF}" ] && echo "ERROR: Failed to pull SIF after 5 attempts." && exit 1
 else
     echo "      Already exists, skipping."
 fi
