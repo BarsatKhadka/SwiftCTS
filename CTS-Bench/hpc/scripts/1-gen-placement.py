@@ -146,7 +146,7 @@ def run_single_experiment(design_name, clock_period, clock_port, top_module=None
     if design_name in DESIGNS_WITH_INCLUDES:
         config["VERILOG_INCLUDE_DIRS"] = [os.path.join(CTS_BENCH_ROOT, "designs", design_name, "rtl")]
 
-    config_path = os.path.join(CTS_BENCH_ROOT, "tmp_ol_config.json")
+    config_path = os.path.join(CTS_BENCH_ROOT, f"tmp_ol_config_{tag}.json")
     with open(config_path, "w") as f:
         json.dump(config, f, indent=4)
 
@@ -184,7 +184,7 @@ def run_single_experiment(design_name, clock_period, clock_port, top_module=None
         print(f"Run dir not found: {run_dir}")
         return None
 
-    with open(os.path.join(CTS_BENCH_ROOT, "latest_run.txt"), "w") as f:
+    with open(os.path.join(CTS_BENCH_ROOT, f"latest_run_{tag}.txt"), "w") as f:
         f.write(tag + "\n")
 
     stats = {
@@ -195,12 +195,12 @@ def run_single_experiment(design_name, clock_period, clock_port, top_module=None
     }
     with open(os.path.join(run_dir, "placement_stats.json"), "w") as f:
         json.dump(stats, f, indent=4)
-    with open(os.path.join(CTS_BENCH_ROOT, "latest_stats.json"), "w") as f:
+    with open(os.path.join(CTS_BENCH_ROOT, f"latest_stats_{tag}.json"), "w") as f:
         json.dump(stats, f, indent=4)
 
     print("\n--- Extracting timing paths ---")
     extract_timing_paths(run_dir, top_module or design_name)
-    print(f"Done: {tag}")
+    print(f"PLACEMENT_TAG={tag}")  # must be last line — parsed by main-hpc.py
     return tag
 
 

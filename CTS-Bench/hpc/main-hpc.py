@@ -76,8 +76,8 @@ def setup_dirs():
     os.makedirs(SHARDS_DIR, exist_ok=True)
 
 
-def get_latest_run_tag():
-    p = os.path.join(CTS_BENCH_ROOT, "latest_run.txt")
+def get_run_tag_for(tag):
+    p = os.path.join(CTS_BENCH_ROOT, f"latest_run_{tag}.txt")
     return open(p).read().strip() if os.path.exists(p) else None
 
 
@@ -113,11 +113,12 @@ def log_to_shard(task_id, placement_id, saved_paths):
     write_header = not os.path.exists(shard_path)
 
     pl_stats = {}
+    stats_path = os.path.join(CTS_BENCH_ROOT, f"latest_stats_{placement_id}.json")
     try:
-        with open(os.path.join(CTS_BENCH_ROOT, "latest_stats.json")) as f:
+        with open(stats_path) as f:
             pl_stats = json.load(f)
     except FileNotFoundError:
-        print("latest_stats.json not found"); return
+        print(f"latest_stats_{placement_id}.json not found"); return
 
     dataset_path = os.path.join(CTS_BENCH_ROOT, "runs", placement_id, "dataset.json")
     if not os.path.exists(dataset_path):
@@ -198,12 +199,18 @@ def run_iteration(task_id, design_name):
             "python3",
             os.path.join(CTS_BENCH_ROOT, "hpc", "scripts", "1-gen-placement.py"),
             design_name, str(clock_period), clock_port, top_module, str(max_core_util),
-        ], cwd=CTS_BENCH_ROOT)
+        ], cwd=CTS_BENCH_ROOT, capture_output=True, text=True)
+        print(r.stdout)
+        if r.stderr:
+            print(r.stderr, file=sys.stderr)
         if r.returncode != 0:
             print(f"Placement failed. Skipping."); return
-        placement_id = get_latest_run_tag()
+        placement_id = None
+        for line in (r.stdout or "").splitlines():
+            if line.startswith("PLACEMENT_TAG="):
+                placement_id = line.split("=", 1)[1].strip()
         if not placement_id:
-            print("No placement ID found. Skipping."); return
+            print("No PLACEMENT_TAG in placement stdout. Skipping."); return
 
         dp = glob.glob(os.path.join(CTS_BENCH_ROOT, "runs", placement_id, "*-openroad-detailedplacement"))
         if not dp:
@@ -246,14 +253,7 @@ def run_iteration(task_id, design_name):
         return
 
     # 5. Save DEF/SAIF/timing
-    design_name_logged = ""
-    try:
-        with open(os.path.join(CTS_BENCH_ROOT, "latest_stats.json")) as f:
-            design_name_logged = json.load(f).get("design_name", "")
-    except FileNotFoundError:
-        pass
-
-    saved = save_essential_files(placement_id, design_name_logged or top_module)
+    saved = save_essential_files(placement_id, top_module)
 
     # 6. Log to shard CSV
     log_to_shard(task_id, placement_id, saved)
