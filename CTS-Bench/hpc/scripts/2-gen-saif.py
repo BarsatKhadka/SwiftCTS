@@ -1,7 +1,7 @@
 """
 HPC version of 2-gen-saif.py
-Calls iverilog/vvp directly — no nix wrapper needed.
-iverilog must be in PATH (loaded via 'module load iverilog' in the job script).
+Runs iverilog/vvp inside the OpenLane Singularity container — no host install needed.
+The OpenLane 2.3.10 SIF includes Icarus Verilog (iverilog/vvp).
 """
 import glob
 import os
@@ -13,6 +13,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 CTS_BENCH_ROOT = os.environ.get("CTS_BENCH_ROOT", os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+OPENLANE_SIF   = os.environ.get("OPENLANE_SIF", os.path.expanduser("~/singularity/openlane2-2.3.10.sif"))
 FILENAME       = sys.argv[1]
 
 DESIGN_CONFIG = {
@@ -51,12 +52,12 @@ if not _nl_files:
     sys.exit(f"[ERROR] No .nl.v netlist in {PLACEMENT_DIR}")
 NETLIST_PATH = sorted(_nl_files)[0]
 
-cfg            = DESIGN_CONFIG[DESIGN_NAME]
-TESTBENCH_PATH = os.path.join(DESIGN_SRC_DIR, "tb", cfg["tb_file"])
+cfg             = DESIGN_CONFIG[DESIGN_NAME]
+TESTBENCH_PATH  = os.path.join(DESIGN_SRC_DIR, "tb", cfg["tb_file"])
 PRIMITIVES_PATH = os.path.join(CTS_BENCH_ROOT, "designs", "primitives.v")
-SKY130_PATH    = os.path.join(CTS_BENCH_ROOT, "designs", "sky130_fd_sc_hd.v")
-WAVE2SAIF_PATH = os.path.join(CTS_BENCH_ROOT, "vcd2saif.py")
-FIRMWARE_PATH  = os.path.join(DESIGN_SRC_DIR, "firmware", "firmware.hex")
+SKY130_PATH     = os.path.join(CTS_BENCH_ROOT, "designs", "sky130_fd_sc_hd.v")
+WAVE2SAIF_PATH  = os.path.join(CTS_BENCH_ROOT, "vcd2saif.py")
+FIRMWARE_PATH   = os.path.join(DESIGN_SRC_DIR, "firmware", "firmware.hex")
 
 SIM_EXEC  = os.path.join(RUN_DIR, "sim_gate.out")
 VCD_FILE  = os.path.join(RUN_DIR, cfg["vcd_file"])
@@ -67,28 +68,38 @@ RTL_INCLUDE = os.path.join(DESIGN_SRC_DIR, "rtl")
 
 DESIGNS_WITH_INCLUDES = {"ethmac", "i2c", "usb_phy", "mem_ctrl", "wb_dma", "ac97_ctrl", "pci"}
 
+# Singularity wrapper — bind CTS_BENCH_ROOT so all file paths resolve inside container
+SING_PREFIX = [
+    "singularity", "exec",
+    "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
+    "--pwd",  CTS_BENCH_ROOT,
+    OPENLANE_SIF,
+]
+
 
 def run(cmd, cwd=None):
     print(f"[RUN] {' '.join(cmd)}")
     result = subprocess.run(cmd, cwd=cwd, check=True, text=True, capture_output=True)
     if result.stdout:
         print(result.stdout)
+    if result.stderr:
+        print(result.stderr)
 
 
-# 1. Compile with iverilog (no nix wrapper — loaded via module load in job)
-iverilog_cmd = ["iverilog", "-o", SIM_EXEC, "-DFUNCTIONAL", "-DUNIT_DELAY=#1"]
+# 1. Compile with iverilog (inside Singularity — no host install required)
+iverilog_cmd = SING_PREFIX + ["iverilog", "-o", SIM_EXEC, "-DFUNCTIONAL", "-DUNIT_DELAY=#1"]
 if DESIGN_NAME in DESIGNS_WITH_INCLUDES:
     iverilog_cmd += ["-I", TB_INCLUDE, "-I", RTL_INCLUDE]
 iverilog_cmd += [TESTBENCH_PATH, NETLIST_PATH, PRIMITIVES_PATH, SKY130_PATH]
 run(iverilog_cmd)
 
-# 2. Simulate with vvp
-vvp_cmd = ["vvp", SIM_EXEC, "+vcd"]
+# 2. Simulate with vvp (inside Singularity)
+vvp_cmd = SING_PREFIX + ["vvp", SIM_EXEC, "+vcd"]
 if cfg["needs_firmware"]:
     if not os.path.exists(FIRMWARE_PATH):
         sys.exit(f"[ERROR] Firmware not found: {FIRMWARE_PATH}")
     vvp_cmd.append(f"+firmware={FIRMWARE_PATH}")
 run(vvp_cmd, cwd=RUN_DIR)
 
-# 3. VCD → SAIF (Python-native, no binary dependency)
+# 3. VCD → SAIF (Python-native, runs on host — no container needed)
 run(["python3", WAVE2SAIF_PATH, "-o", SAIF_FILE, VCD_FILE])

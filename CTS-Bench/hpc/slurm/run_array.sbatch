@@ -8,6 +8,9 @@
 # Total rows = N_TASKS × ITERS_PER_TASK × 10
 # Example: 200 tasks × 5 iters × 10 CTS configs = 10,000 rows
 #
+# NO host iverilog required — iverilog/vvp run inside the OpenLane Singularity
+# container, which already bundles Icarus Verilog.
+#
 # Submit (adjust path to wherever SwiftCTS is cloned on your HPC):
 #   sbatch ~/SwiftCTS/CTS-Bench/hpc/slurm/run_array.sbatch
 #
@@ -38,18 +41,16 @@ else
     exit 1
 fi
 
-# Load iverilog (adjust module name to match your cluster)
+# Only need python3 and singularity on the host — no iverilog module required
 module purge
-module load python        2>/dev/null || true
-module load iverilog      2>/dev/null || \
-module load icarus-verilog 2>/dev/null || true   # name varies by cluster
+module load python 2>/dev/null || true
 
 echo "=== CTS-Bench task ${SLURM_ARRAY_TASK_ID} starting on $(hostname) ==="
 echo "    CTS_BENCH_ROOT : ${CTS_BENCH_ROOT}"
 echo "    OPENLANE_SIF   : ${OPENLANE_SIF}"
 echo "    SKY130_PDK     : ${SKY130_PDK}"
 echo "    SHARDS_DIR     : ${SHARDS_DIR}"
-echo "    iverilog       : $(which iverilog 2>/dev/null || echo NOT FOUND)"
+echo "    singularity    : $(which singularity 2>/dev/null || echo NOT FOUND)"
 
 # Validate key files exist before running
 if [ ! -f "${OPENLANE_SIF}" ]; then
@@ -60,8 +61,8 @@ if [ ! -d "${SKY130_PDK}" ]; then
     echo "ERROR: PDK not found at ${SKY130_PDK}. Run setup.sh first." >&2
     exit 1
 fi
-if [ ! -f "$(which iverilog 2>/dev/null)" ]; then
-    echo "ERROR: iverilog not in PATH. Check module load command." >&2
+if ! command -v singularity &>/dev/null; then
+    echo "ERROR: singularity not in PATH." >&2
     exit 1
 fi
 

@@ -29,12 +29,13 @@ python3 ~/SwiftCTS/CTS-Bench/hpc/slurm/merge_csvs.py
 
 ## Cluster Config (edit before submitting)
 
-**`hpc/slurm/run_array.sbatch`** — two lines to change:
+**`hpc/slurm/run_array.sbatch`** — one line to change:
 ```bash
-#SBATCH --partition=cpu        # ← your cluster's CPU partition name
-module load iverilog            # ← your cluster's iverilog module name
-                                #   (might be icarus-verilog or similar)
+#SBATCH --partition=cpuq       # ← your cluster's CPU partition name
 ```
+No iverilog module needed — `iverilog` and `vvp` run **inside the OpenLane
+Singularity container** which already bundles Icarus Verilog. Only `python3`
+and `singularity` need to be available on the host.
 
 **`hpc/env.sh`** — override these if you want non-default storage paths:
 ```bash
