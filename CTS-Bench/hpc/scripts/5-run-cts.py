@@ -21,11 +21,12 @@ elif os.path.exists("latest_run.txt"):
 else:
     sys.exit("Error: No Run Tag provided and latest_run.txt not found.")
 
-# PDK from env — set by singularity --env flag in main-hpc.py
-MY_PDK_ROOT = os.environ.get(
-    "PDK_ROOT",
-    os.environ.get("SKY130_PDK", "/home/users/bkhadka/pdk/sky130/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af")
-)
+# PDK from env — set by singularity --env flags in main-hpc.py
+# SKY130_PDK = versioned path (.../versions/HASH) — explicit, no symlink needed
+# PDK_ROOT   = volare parent (.../pdk/sky130) — volare symlink resolves sky130A/
+SKY130_PDK_ENV = os.environ.get("SKY130_PDK", "")
+PDK_ROOT_ENV   = os.environ.get("PDK_ROOT", os.path.expanduser("~/pdk/sky130"))
+MY_PDK_ROOT    = SKY130_PDK_ENV if SKY130_PDK_ENV else PDK_ROOT_ENV
 os.environ["PDK_ROOT"] = MY_PDK_ROOT
 
 

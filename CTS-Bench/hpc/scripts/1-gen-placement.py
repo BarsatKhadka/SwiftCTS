@@ -97,7 +97,7 @@ exit
     result = subprocess.run([
         CONTAINER_CMD, "exec",
         "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
-        "--bind", f"{SKY130_PDK}:{SKY130_PDK}",
+        "--bind", f"{PDK_ROOT}:{PDK_ROOT}",
         OPENLANE_SIF,
         "openroad", "-exit", tcl_path,
     ], capture_output=True, text=True)
@@ -154,9 +154,9 @@ def run_single_experiment(design_name, clock_period, clock_port, top_module=None
     result = subprocess.run([
         CONTAINER_CMD, "exec",
         "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
-        "--bind", f"{SKY130_PDK}:{SKY130_PDK}",
+        "--bind", f"{PDK_ROOT}:{PDK_ROOT}",
         "--pwd",  CTS_BENCH_ROOT,
-        "--env",  f"PDK_ROOT={SKY130_PDK}",
+        "--env",  f"PDK_ROOT={PDK_ROOT}",
         OPENLANE_SIF,
         "python3", "-m", "openlane",
         "-T", "OpenROAD.DetailedPlacement",

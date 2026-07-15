@@ -222,9 +222,10 @@ def run_iteration(task_id, design_name):
         subprocess.run([
             CONTAINER_CMD, "exec",
             "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
-            "--bind", f"{SKY130_PDK}:{SKY130_PDK}",
+            "--bind", f"{PDK_ROOT}:{PDK_ROOT}",
             "--pwd",  CTS_BENCH_ROOT,
-            "--env",  f"PDK_ROOT={SKY130_PDK}",
+            "--env",  f"PDK_ROOT={PDK_ROOT}",
+            "--env",  f"SKY130_PDK={SKY130_PDK}",
             OPENLANE_SIF,
             "python3", "hpc/scripts/5-run-cts.py",
             placement_id, top_module, str(clock_period), clock_port,
