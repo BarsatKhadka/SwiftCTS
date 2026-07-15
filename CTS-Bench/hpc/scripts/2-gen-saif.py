@@ -105,6 +105,7 @@ if DESIGN_NAME in DESIGNS_WITH_INCLUDES:
 iverilog_cmd += [TESTBENCH_PATH, NETLIST_PATH, PRIMITIVES_PATH, SKY130_PATH]
 run(iverilog_cmd)
 
+os.stat(RUN_DIR)  # force Lustre metadata sync before checking for sim_gate.out
 if not os.path.exists(SIM_EXEC):
     sys.exit(f"[ERROR] iverilog returned 0 but {SIM_EXEC} was not created (silent compile failure)")
 
