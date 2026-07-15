@@ -181,7 +181,10 @@ def log_to_shard(task_id, placement_id, saved_paths):
 def delete_run(placement_id):
     run_dir = os.path.join(CTS_BENCH_ROOT, "runs", placement_id)
     if os.path.exists(run_dir):
-        shutil.rmtree(run_dir)
+        try:
+            shutil.rmtree(run_dir)
+        except OSError as e:
+            print(f"  Warning: could not delete {run_dir}: {e}")
 
 
 def run_iteration(task_id, design_name):
