@@ -26,6 +26,7 @@ OPENLANE_SIF   = os.environ.get("OPENLANE_SIF",   os.path.join(os.path.expanduse
 PDK_ROOT       = os.environ.get("PDK_ROOT",       os.path.join(os.path.expanduser("~"), "pdk", "sky130"))
 PDK_HASH       = os.environ.get("PDK_HASH",       "0fe599b2afb6708d281543108caf8310912f54af")
 SKY130_PDK     = os.environ.get("SKY130_PDK",     os.path.join(PDK_ROOT, "volare", "sky130", "versions", PDK_HASH))
+CONTAINER_CMD  = os.environ.get("CONTAINER_CMD",  "apptainer" if shutil.which("apptainer") else "singularity")
 
 LOG_FILE       = os.environ.get("LOG_FILE", os.path.join(DATASET_ROOT, "experiment_log.csv"))
 KEPT_FILES_DIR = os.path.join(DATASET_ROOT, "placement_files")
@@ -219,7 +220,7 @@ def run_iteration(task_id, design_name):
         # 3. CTS sweep (Singularity)
         print(f"[{design_name}] CTS sweep (10 configs)...")
         subprocess.run([
-            "singularity", "exec",
+            CONTAINER_CMD, "exec",
             "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
             "--bind", f"{SKY130_PDK}:{SKY130_PDK}",
             "--pwd",  CTS_BENCH_ROOT,

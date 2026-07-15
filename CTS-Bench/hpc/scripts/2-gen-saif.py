@@ -5,6 +5,7 @@ The OpenLane 2.3.10 SIF includes Icarus Verilog (iverilog/vvp).
 """
 import glob
 import os
+import shutil
 import subprocess
 import sys
 
@@ -13,7 +14,8 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 CTS_BENCH_ROOT = os.environ.get("CTS_BENCH_ROOT", os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-OPENLANE_SIF   = os.environ.get("OPENLANE_SIF", os.path.expanduser("~/singularity/openlane2-2.3.10.sif"))
+OPENLANE_SIF   = os.environ.get("OPENLANE_SIF",  os.path.expanduser("~/singularity/openlane2-2.3.10.sif"))
+CONTAINER_CMD  = os.environ.get("CONTAINER_CMD", "apptainer" if shutil.which("apptainer") else "singularity")
 FILENAME       = sys.argv[1]
 
 DESIGN_CONFIG = {
@@ -70,7 +72,7 @@ DESIGNS_WITH_INCLUDES = {"ethmac", "i2c", "usb_phy", "mem_ctrl", "wb_dma", "ac97
 
 # Singularity wrapper — bind CTS_BENCH_ROOT so all file paths resolve inside container
 SING_PREFIX = [
-    "singularity", "exec",
+    CONTAINER_CMD, "exec",
     "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
     "--pwd",  CTS_BENCH_ROOT,
     OPENLANE_SIF,

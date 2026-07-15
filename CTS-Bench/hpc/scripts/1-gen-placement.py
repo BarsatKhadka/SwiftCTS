@@ -1,12 +1,13 @@
 """
 HPC version of 1-gen-placement.py
-Uses singularity exec instead of --dockerized Docker mode.
+Uses apptainer/singularity exec instead of --dockerized Docker mode.
 All paths driven by env vars set in env.sh.
 """
 import glob
 import json
 import os
 import random
+import shutil
 import subprocess
 import sys
 from datetime import datetime
@@ -17,6 +18,7 @@ PDK_ROOT       = os.environ.get("PDK_ROOT",       os.path.join(os.path.expanduse
 PDK_HASH       = os.environ.get("PDK_HASH",       "0fe599b2afb6708d281543108caf8310912f54af")
 SKY130_PDK     = os.environ.get("SKY130_PDK",     os.path.join(PDK_ROOT, "volare", "sky130", "versions", PDK_HASH))
 OPENLANE_SIF   = os.environ.get("OPENLANE_SIF",   os.path.join(os.path.expanduser("~"), "singularity", "openlane2-2.3.10.sif"))
+CONTAINER_CMD  = os.environ.get("CONTAINER_CMD",  "apptainer" if shutil.which("apptainer") else "singularity")
 
 LIB_PATH = f"{SKY130_PDK}/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib"
 DESIGNS_WITH_INCLUDES = {"ethmac", "i2c", "usb_phy", "mem_ctrl", "wb_dma", "ac97_ctrl", "pci"}
@@ -93,7 +95,7 @@ exit
         f.write(tcl)
 
     result = subprocess.run([
-        "singularity", "exec",
+        CONTAINER_CMD, "exec",
         "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
         "--bind", f"{SKY130_PDK}:{SKY130_PDK}",
         OPENLANE_SIF,
@@ -148,9 +150,9 @@ def run_single_experiment(design_name, clock_period, clock_port, top_module=None
     with open(config_path, "w") as f:
         json.dump(config, f, indent=4)
 
-    print(f"Running OpenLane (singularity) for {design_name} tag={tag}")
+    print(f"Running OpenLane ({CONTAINER_CMD}) for {design_name} tag={tag}")
     result = subprocess.run([
-        "singularity", "exec",
+        CONTAINER_CMD, "exec",
         "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
         "--bind", f"{SKY130_PDK}:{SKY130_PDK}",
         "--pwd",  CTS_BENCH_ROOT,

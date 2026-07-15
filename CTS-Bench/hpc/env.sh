@@ -33,7 +33,15 @@ export SKY130_PDK="${PDK_ROOT}/volare/sky130/versions/${PDK_HASH}"
 # Path to the OpenLane 2.3.10 singularity image (pull once with setup.sh)
 export OPENLANE_SIF="${OPENLANE_SIF:-${HOME}/singularity/openlane2-2.3.10.sif}"
 
+# ── Container runtime ─────────────────────────────────────────────────────────
+# Prefer apptainer (Singularity's successor); fall back to singularity
+if command -v apptainer &>/dev/null; then
+    export CONTAINER_CMD="apptainer"
+else
+    export CONTAINER_CMD="singularity"
+fi
+
 # ── Convenience ───────────────────────────────────────────────────────────────
 export HPC_SCRIPTS="${CTS_BENCH_ROOT}/hpc/scripts"
 export HPC_SLURM="${CTS_BENCH_ROOT}/hpc/slurm"
-# Note: no Python venv needed — openlane runs inside the Singularity container
+# Note: no Python venv needed — openlane runs inside the container
