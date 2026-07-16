@@ -29,13 +29,17 @@ cts_folders = sorted(glob.glob(os.path.join(CTS_EXP_DIR, "CTS-*")))
 for folder in cts_folders:
     exp_id = os.path.basename(folder) # e.g., "CTS-1"
     
-    # Path to the critical JSON file
-    json_path = os.path.join(folder, "2-openroad-stamidpnr", "state_out.json")
     knobs_path = os.path.join(folder, "knobs.json")
 
-    # Skip if files don't exist (maybe run failed)
+    # Find STAMidPNR step dir — OpenLane zero-pads step numbers (e.g. 02-openroad-stamidpnr)
+    sta_dirs = glob.glob(os.path.join(folder, "*-openroad-stamidpnr"))
+    if not sta_dirs:
+        print(f"  Skipping {exp_id}: no stamidpnr step directory found.")
+        continue
+    json_path = os.path.join(sorted(sta_dirs)[-1], "state_out.json")
+
     if not os.path.exists(json_path):
-        print(f" Skipping {exp_id}: state_out.json not found.")
+        print(f"  Skipping {exp_id}: state_out.json not found in {sorted(sta_dirs)[-1]}.")
         continue
 
     try:
