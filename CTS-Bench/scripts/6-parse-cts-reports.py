@@ -31,16 +31,13 @@ for folder in cts_folders:
     
     knobs_path = os.path.join(folder, "knobs.json")
 
-    # Find STAMidPNR step dir — OpenLane zero-pads step numbers (e.g. 02-openroad-stamidpnr)
-    sta_dirs = glob.glob(os.path.join(folder, "*-openroad-stamidpnr"))
-    if not sta_dirs:
-        print(f"  Skipping {exp_id}: no stamidpnr step directory found.")
+    # Find the last state_out.json under this CTS-N folder (step dirs vary by OpenLane version)
+    state_files = sorted(glob.glob(os.path.join(folder, "**", "state_out.json"), recursive=True))
+    if not state_files:
+        print(f"  Skipping {exp_id}: no state_out.json found under {folder}")
         continue
-    json_path = os.path.join(sorted(sta_dirs)[-1], "state_out.json")
-
-    if not os.path.exists(json_path):
-        print(f"  Skipping {exp_id}: state_out.json not found in {sorted(sta_dirs)[-1]}.")
-        continue
+    json_path = state_files[-1]  # last step = STAMidPNR (STA after CTS)
+    print(f"  {exp_id}: using {os.path.relpath(json_path, folder)}")
 
     try:
         # Load Knobs (Inputs)
