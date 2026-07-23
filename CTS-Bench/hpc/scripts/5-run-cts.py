@@ -22,8 +22,6 @@ else:
     sys.exit("Error: No Run Tag provided and latest_run.txt not found.")
 
 # PDK from env — set by singularity --env flags in main-hpc.py
-# SKY130_PDK = versioned path (.../versions/HASH) — explicit, no symlink needed
-# PDK_ROOT   = volare parent (.../pdk/sky130) — volare symlink resolves sky130A/
 SKY130_PDK_ENV = os.environ.get("SKY130_PDK", "")
 PDK_ROOT_ENV   = os.environ.get("PDK_ROOT", os.path.expanduser("~/pdk/sky130"))
 MY_PDK_ROOT    = SKY130_PDK_ENV if SKY130_PDK_ENV else PDK_ROOT_ENV
@@ -68,9 +66,18 @@ def run_cts_from_placement(DESIGN, clock_period, clock_port):
             "CTS_DISTANCE_BETWEEN_BUFFERS":     random.randint(70, 150),
             "CTS_CLK_MAX_WIRE_LENGTH":          random.randint(130, 280),
         }
-        print(f"  Knobs: {knobs}")
+        print(f"  CTS-{i+1} knobs: {knobs}")
 
-        cts_tag = f"{FILENAME}/CTS-experiments/CTS-{i+1}"
+        # Put both knobs.json and OpenLane output in the same directory so
+        # 6-parse-cts-reports.py can find state_out.json via recursive glob.
+        target_dir = os.path.abspath(
+            os.path.join("runs", FILENAME, "CTS-experiments", f"CTS-{i+1}")
+        )
+        os.makedirs(target_dir, exist_ok=True)
+
+        with open(os.path.join(target_dir, "knobs.json"), "w") as f:
+            json.dump(knobs, f, indent=4)
+
         config = {
             "DESIGN_NAME": DESIGN,
             "PDK": "sky130A",
@@ -80,22 +87,20 @@ def run_cts_from_placement(DESIGN, clock_period, clock_port):
             **knobs,
         }
 
-        knob_dir = os.path.join("runs", cts_tag)
-        os.makedirs(knob_dir, exist_ok=True)
-        with open(os.path.join(knob_dir, "knobs.json"), "w") as f:
-            json.dump(knobs, f, indent=4)
-
         flow = CTSOnlyFlow(
             config=config,
-            design_dir=os.path.join("runs", FILENAME),
+            design_dir=".",
             pdk_root=MY_PDK_ROOT,
             pdk="sky130A",
             scl="sky130_fd_sc_hd",
         )
         try:
-            flow.run(
-                initial_state=base_state,
-                tag=cts_tag,
+            # _force_run_dir puts OpenLane output directly in target_dir so
+            # state_out.json lands at target_dir/{step}/state_out.json —
+            # exactly where 6-parse-cts-reports.py's recursive glob looks.
+            flow.start(
+                with_initial_state=base_state,
+                _force_run_dir=target_dir,
             )
             print(f"  CTS-{i+1} complete")
         except Exception as e:

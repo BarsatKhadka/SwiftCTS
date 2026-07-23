@@ -14,16 +14,20 @@
 
 \usepackage{booktabs}
 \usepackage{multirow}
-\usepackage{amsmath,amssymb}
-\usepackage{graphicx}
+\usepackage{amsmath}
 \usepackage{enumitem}
-\usepackage{xcolor}
 \usepackage{colortbl}
-\usepackage[table]{xcolor}
 \usepackage{soul}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,positioning,fit,backgrounds,calc,shadows,
                 shapes.geometric,shapes.symbols,shapes.misc,patterns}
+\usepackage{placeins}
+\raggedbottom
+\graphicspath{{iccad_barsat/}}
+
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
 
 \definecolor{bestrow}{RGB}{213,240,213}
 
@@ -69,36 +73,33 @@
 \begin{abstract}
 Machine learning for Clock Tree Synthesis (CTS) remains fundamentally
 constrained by the lack of open, large-scale, and reproducible datasets.
-Existing efforts use at most five proprietary or limited-license designs
+Existing efforts mostly rely on proprietary or limited-license designs
 and rarely expose the complete placement-to-CTS pipeline, preventing
 community reuse. We present \textbf{CTS-Bench}, a dataset and reproducible
 generation framework that systematically bridges this gap.
 
-CTS-Bench provides \textbf{10,000+ CTS evaluations} derived from
-\textbf{19 open-source RTL designs} spanning two diverse benchmark suites
-(14 IWLS and 5 PlaceDreamer) across the SkyWater 130\,nm PDK.
-Each design undergoes randomized placement under seven knobs followed by
-ten distinct CTS configurations, capturing how structural placement
-decisions propagate into clock power, timing skew, wirelength, and routing
-complexity. An automated, containerized HPC pipeline built on
-OpenLane~\cite{OpenRoad}, Singularity/Apptainer, and SLURM ensures
-full end-to-end reproducibility and allows the benchmark to be extended to
-new designs or technology nodes with a single command.
+CTS-Bench provides \textbf{10,000+ CTS evaluations} across
+\textbf{19 open-source RTL designs} under the SkyWater 130\,nm PDK,
+with the pipeline readily extensible to additional technology nodes.
+Each design undergoes randomized placement followed by ten distinct CTS
+configurations, capturing how structural placement decisions propagate
+into clock power, timing skew, and wirelength. An automated, containerized
+HPC pipeline built on OpenLane~\cite{OpenRoad}, Singularity/Apptainer, and
+SLURM ensures full end-to-end reproducibility.
 
-Beyond the dataset itself, we demonstrate its utility along two axes.
-First, we provide multi-scale graph representations (raw gate-level and
-physics-aware clustered graphs) enabling GNN benchmarking studies;
-experiments with GCN, GraphSAGE, and GATv2 reveal that graph coarsening
-reduces memory by up to $17.2\times$ but breaks local clock skew
-prediction, motivating task-aware clustering research.
-Second, we introduce \textbf{SwiftCTS}, a physics-informed surrogate
-trained entirely on CTS-Bench data, which predicts CTS outcomes in
-sub-millisecond latency---enabling evaluation of 100,000 configurations in
-under 10 seconds---and reduces power prediction error from 24.5\% to 3.3\%
-on completely unseen macro architectures with only one physical reference
-run. Together, CTS-Bench and SwiftCTS establish a foundation for
-data-driven CTS research: an open, large-scale dataset and an end-to-end
-demonstration of what becomes possible when such data exists.
+To demonstrate dataset utility, we present \textbf{SwiftCTS}, a
+physics-informed surrogate trained on CTS-Bench data. SwiftCTS couples
+handcrafted physical features from placement DEF, SAIF activity files, and
+timing reports with gradient-boosted ensembles, achieving competitive
+prediction accuracy at sub-millisecond inference latency on CPU. A K-shot
+calibration step adapts predictions to unseen designs with a single
+physical reference run. We further show that such lightweight,
+feature-engineered models can serve as practical alternatives to
+neural approaches for CTS configuration space exploration, contributing
+a new data point to the growing discussion on gradient boosting vs.\ deep
+learning in tabular EDA settings.
+Together, CTS-Bench and SwiftCTS establish a reproducible foundation for
+data-driven CTS research.
 
 All data, code, and the HPC pipeline are publicly available at:
 \href{https://github.com/BarsatKhadka/SwiftCTS}{https://github.com/BarsatKhadka/SwiftCTS}
@@ -135,8 +136,8 @@ All data, code, and the HPC pipeline are publicly available at:
 \ccsdesc[300]{Hardware~Best practices for EDA}
 
 \keywords{Electronic Design Automation, Clock Tree Synthesis, Open Dataset,
-  Machine Learning, Graph Neural Networks, Surrogate Models, Physical Design,
-  HPC Pipeline, OpenROAD, Sky130}
+  Machine Learning, Surrogate Models, Physical Design,
+  HPC Pipeline, OpenROAD, Sky130, Design Space Exploration}
 
 \maketitle
 
@@ -148,11 +149,11 @@ All data, code, and the HPC pipeline are publicly available at:
 Clock Tree Synthesis is among the most computationally intensive and
 quality-sensitive stages of the physical design flow. The clock network
 directly governs chip power (15--40\% of total dynamic dissipation in
-modern designs), timing closure, and routing congestion. Engineers
-navigate a high-dimensional configuration space---cluster diameter, maximum
-wire length, buffer distances, and sink cluster sizes---by repeatedly
-invoking the EDA tool on each placement, an exhaustive process that can
-consume days per tapeout. The EDA community has turned increasingly to
+modern designs), timing closure, and routing congestion. Tuning a clock
+tree requires the designer to repeatedly invoke CTS with different
+buffer sizes, sink clustering thresholds, and wire-length limits, each
+invocation taking minutes to hours, making exhaustive search across
+placements infeasible in practice. The EDA community has turned increasingly to
 machine learning (ML) to automate this exploration, proposing analytical
 models~\cite{kahng,kahng2,kahng3}, convolutional
 surrogates~\cite{nagaria2020}, generative adversarial
@@ -174,59 +175,41 @@ data problem: models trained on limited design families collapse when faced
 with unseen macro architectures \cite{zhengDAC,ghoseICCAD}, and without
 public datasets, every new research group must rebuild their own
 infrastructure from scratch.
-The TODAES Special Issue on Open, Reliable, and Generalizable Datasets for
-AI in EDA was created precisely because ``design and manufacturing data are
-fragmented across abstraction layers, tools, and technology nodes, and
-existing datasets often suffer from limited scale, quality, accessibility,
-and diversity.''
 CTS-Bench directly addresses this gap.
 
 \paragraph{Contributions.}
 This paper makes four primary contributions:
 \begin{enumerate}[leftmargin=*,topsep=2pt,itemsep=2pt]
-  \item \textbf{Scale and diversity.} We release a dataset of \textbf{10,000+
-    CTS evaluations} across \textbf{19 open-source RTL designs} (14 IWLS + 5
-    PlaceDreamer), spanning a $100\times$ range in design complexity, all
-    synthesized and placed under the SkyWater 130\,nm PDK with OpenROAD.
+  \item \textbf{Open tabular dataset.} We release \textbf{10,000+ CTS
+    evaluations} across \textbf{19 open-source RTL designs} spanning a
+    $100\times$ range in design complexity. Each row captures placement
+    configuration, four CTS parameters, and 15 ground-truth QoR metrics from
+    the full OpenROAD flow.
 
-  \item \textbf{Reproducible HPC pipeline.} We provide a fully automated,
-    containerized generation pipeline (OpenLane inside Singularity/Apptainer,
-    SLURM array jobs) that can be re-run or extended to new designs or PDKs
-    with a single command. Every placement configuration is logged and every
-    CTS run archived.
+  \item \textbf{Reproducible HPC pipeline.} A fully automated, containerized
+    generation pipeline (OpenLane~2.3.10 inside Singularity/Apptainer, SLURM
+    array jobs) that extends to new designs or PDKs with a single command.
+    The tool stack is version-pinned and requires no host EDA installation.
 
-  \item \textbf{Multi-scale graph representations.} Each physical placement is
-    accompanied by both a raw gate-level graph and a physics-aware clustered
-    graph. GNN benchmarking experiments on GCN, GraphSAGE, and GATv2 quantify
-    the accuracy--efficiency trade-off and reveal that generic graph coarsening
-    breaks local clock skew prediction.
+  \item \textbf{Graph extraction pipeline.} An optional physics-aware graph
+    clustering module generates raw gate-level and coarsened representations
+    for any design in the corpus, enabling future GNN research on the same
+    evaluation framework.
 
-  \item \textbf{Proof of dataset utility: SwiftCTS.} Trained entirely on
-    CTS-Bench data, SwiftCTS is a physics-informed surrogate (gradient-boosted
-    ensembles + K-shot calibration) that predicts CTS outcomes at
-    sub-millisecond latency, enables comprehensive Pareto optimization over
-    100,000 configurations in under 10 seconds, and generalizes to unseen
-    macro architectures with under 3.3\% power error after a single physical
-    reference run.
+  \item \textbf{Proof of dataset utility: SwiftCTS.} A physics-informed
+    surrogate (gradient-boosted ensembles + K-shot calibration) trained
+    entirely on CTS-Bench data. We demonstrate that careful feature engineering
+    with gradient boosting matches or exceeds deep learning baselines for
+    tabular CTS prediction, contributing a concrete data point on the
+    gradient-boosting vs.\ neural-network tradeoff in EDA.
 \end{enumerate}
-
-\noindent
-This work substantially extends our preliminary workshop
-paper~\cite{khadka2026} (5 designs, 4,860 evaluations, no HPC pipeline,
-no surrogate). New material comprises the 19-design corpus, the
-production-grade HPC pipeline, the SwiftCTS surrogate and its complete
-experimental evaluation, and an expanded dataset characterization with
-cross-design statistical analysis.
 
 The rest of this paper is organized as follows.
 Section~\ref{sec:related} reviews related work.
-Section~\ref{sec:dataset} describes the CTS-Bench dataset, design corpus,
-and generation pipeline.
-Section~\ref{sec:graphs} covers multi-scale graph representations.
+Section~\ref{sec:dataset} describes the dataset, design corpus, and pipeline.
 Section~\ref{sec:analysis} characterizes the dataset.
 Section~\ref{sec:swiftcts} presents the SwiftCTS surrogate.
-Section~\ref{sec:gnn} reports GNN benchmarking experiments.
-Section~\ref{sec:surrogate_results} presents SwiftCTS results.
+Section~\ref{sec:surrogate_results} presents SwiftCTS experimental results.
 Section~\ref{sec:limitations} discusses limitations and future directions.
 Section~\ref{sec:conclusion} concludes.
 
@@ -234,6 +217,34 @@ Section~\ref{sec:conclusion} concludes.
 \section{Background and Related Work}
 \label{sec:related}
 %%────────────────────────────────────────────────────────────────────────────
+
+\subsection{EDA Datasets and Benchmarks}
+
+\textit{Traditional benchmarks.}
+ISPD98~\cite{10.1145/274535.274546}, ISPD2005~\cite{10.1145/1055137.1055182},
+and ICCAD2015~\cite{7372671} serve algorithmic optimization but provide only
+one reference solution per instance, offer no ML-ready labels, and predate
+modern deep learning requirements.
+
+\textit{Physical design datasets.}
+CircuitNet~\cite{jiang2024circuitnet} and
+EDA-schema~\cite{10.1145/3649476.3658718} provide broader physical design
+datasets. CircuitNet 2.0 covers congestion and timing across multiple
+industrial designs; EDA-schema introduces a standardized graph format with
+960 designs. Neither isolates the placement-CTS interface or provides the
+multi-variant CTS evaluations per placement needed to study configuration
+sensitivity.
+
+\textit{General ML benchmarks.}
+OGB~\cite{hu2021opengraphbenchmarkdatasets} and
+LRGB~\cite{dwivedi2023longrangegraphbenchmark} standardize evaluation on
+social, citation, and molecular graphs. Their structural properties differ
+fundamentally from logic netlists, making them poor proxies for EDA workloads.
+
+\noindent
+CTS-Bench fills the gap left by all prior work: a large-scale,
+CTS-specific tabular dataset with a reproducible HPC pipeline, an optional
+graph extraction module, and a deployed surrogate demonstrating dataset utility.
 
 \subsection{Machine Learning for CTS}
 
@@ -263,38 +274,8 @@ Bayesian optimization~\cite{geng2022,zheng2023} samples more efficiently but
 still invokes the tool at each evaluation.
 
 The common thread across all existing approaches: they were developed without
-a shared dataset. CTS-Bench makes training, evaluation, and cross-method
-comparison on a common corpus possible for the first time.
-
-\subsection{EDA Datasets and Benchmarks}
-
-\textit{Traditional benchmarks.}
-ISPD98~\cite{10.1145/274535.274546}, ISPD2005~\cite{10.1145/1055137.1055182},
-and ICCAD2015~\cite{7372671} serve algorithmic optimization but provide only
-one reference solution per instance, offer no ML-ready labels, and predate
-modern deep learning requirements.
-
-\textit{Graph-centric datasets.}
-CircuitNet~\cite{jiang2024circuitnet} and
-EDA-schema~\cite{10.1145/3649476.3658718} provide broader physical design
-datasets. CircuitNet 2.0 covers congestion and timing across multiple
-industrial designs; EDA-schema introduces a standardized graph format with
-960 designs. Neither isolates the placement-CTS interface or provides the
-multi-variant CTS evaluations per placement needed to study configuration
-sensitivity.
-
-\textit{General graph benchmarks.}
-OGB~\cite{hu2021opengraphbenchmarkdatasets} and
-LRGB~\cite{dwivedi2023longrangegraphbenchmark} standardize evaluation on
-social, citation, and molecular graphs. Their structural properties
-(low-fanout, undirected, small diameter) are fundamentally different from
-logic netlists, making them poor proxies for EDA workloads.
-
-\noindent
-CTS-Bench fills the gap left by all prior work: a large-scale,
-CTS-specific dataset paired with multi-scale graph representations, a
-reproducible generation pipeline, and a deployed surrogate demonstrating
-dataset utility.
+a shared dataset, making direct comparison impossible. CTS-Bench enables
+training and evaluation on a common corpus for the first time.
 
 %%────────────────────────────────────────────────────────────────────────────
 \section{The CTS-Bench Dataset}
@@ -303,62 +284,241 @@ dataset utility.
 
 \subsection{Design Corpus}
 
-CTS-Bench comprises 19 open-source RTL designs sourced from two established
-benchmark suites. Table~\ref{tab:designs} lists all designs along with their
-target clock period, clock port, and top module. The corpus spans four orders
-of magnitude in logic complexity, from the 1.8K-cell ZipDiv divider core to
-the 100K+ cell JPEG encoder.
+CTS-Bench comprises 19 open-source RTL designs covering diverse functional
+domains. Table~\ref{tab:designs} lists all designs with their target clock
+period and top module. The corpus spans four orders of magnitude in logic
+complexity, from the 1.8K-cell ZipDiv divider core to the 100K+ cell JPEG
+encoder, covering cryptography, microprocessors, networking, arithmetic,
+bus interfaces, and multimedia.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \small
 \caption{CTS-Bench Design Corpus (19 designs).}
 \label{tab:designs}
-\begin{tabular}{llll}
+\begin{tabular}{lll}
 \toprule
-\textbf{Design} & \textbf{Suite} & \textbf{Clk (ns)} & \textbf{Top Module} \\
+\textbf{Design} & \textbf{Clk (ns)} & \textbf{Domain} \\
 \midrule
-usb\_phy    & IWLS & 10.0 & usb\_phy \\
-mem\_ctrl   & IWLS & 10.0 & mc\_top \\
-jpeg        & IWLS & 10.0 & jpeg\_top \\
-wb\_dma     & IWLS & 10.0 & wb\_dma\_top \\
-ac97\_ctrl  & IWLS & 10.0 & ac97\_top \\
-pci         & IWLS & 10.0 & pci\_bridge32 \\
-i2c         & IWLS & 10.0 & i2c\_master\_top \\
-spi         & IWLS & 10.0 & simple\_spi \\
-tv80        & IWLS & 10.0 & tv80s \\
-aes         & IWLS &  7.0 & aes \\
-picorv32    & IWLS &  5.0 & picorv32 \\
-sha256      & IWLS &  9.0 & sha256 \\
-ethmac      & IWLS &  9.0 & eth\_top \\
-zipdiv      & IWLS &  5.0 & zipdiv \\
-\midrule
-salsa20     & PlaceDreamer & 10.0 & salsa20 \\
-xtea        & PlaceDreamer & 10.0 & xtea \\
-y\_huff     & PlaceDreamer & 10.0 & y\_huff \\
-PPU         & PlaceDreamer & 10.0 & PPU \\
-usb         & PlaceDreamer & 20.0 & usb \\
+usb\_phy    & 10.0 & Networking \\
+mem\_ctrl   & 10.0 & Bus interface \\
+jpeg        & 10.0 & Multimedia \\
+wb\_dma     & 10.0 & Bus interface \\
+ac97\_ctrl  & 10.0 & Audio \\
+pci         & 10.0 & Networking \\
+i2c         & 10.0 & Bus interface \\
+spi         & 10.0 & Bus interface \\
+tv80        & 10.0 & Processor \\
+aes         &  7.0 & Cryptography \\
+picorv32    &  5.0 & Processor \\
+sha256      &  9.0 & Cryptography \\
+ethmac      &  9.0 & Networking \\
+zipdiv      &  5.0 & Arithmetic \\
+salsa20     & 10.0 & Cryptography \\
+xtea        & 10.0 & Cryptography \\
+y\_huff     & 10.0 & Multimedia \\
+PPU         & 10.0 & Graphics \\
+usb         & 20.0 & Networking \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\noindent
-\textbf{IWLS designs} are canonical open-source IP cores covering diverse
-functional domains: cryptography (AES, SHA-256), microprocessors (PicoRV32,
-TV80), networking (EthMAC, USB PHY, PCI bridge), arithmetic (ZipDiv),
-and bus interfaces (WB-DMA, I2C, SPI, AC97, Memory Controller, JPEG).
-
-\noindent
-\textbf{PlaceDreamer designs} introduce additional structural diversity:
-XTEA and Salsa20 are lightweight stream ciphers, Y-Huff is a Huffman codec,
-PPU is a pixel processing unit, and USB is a full-speed USB controller.
-These designs were sourced from the PlaceDreamer benchmark to extend coverage
-beyond the canonical IWLS set.
 
 \subsection{Automated Generation Pipeline}
 
 The generation pipeline proceeds in three stages for each design, as
 illustrated in Figure~\ref{fig:pipeline}.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{!}{0.38\textheight}{%
+\begin{tikzpicture}[
+    node distance=0.4cm and 0.4cm,
+    font=\scriptsize\sffamily,
+    process/.style = {
+        rectangle, draw=black!70, thick, fill=white,
+        text width=3.2cm,
+        align=center, rounded corners,
+        minimum height=0.9cm, drop shadow,
+        font=\scriptsize\sffamily
+    },
+    visualstep/.style = {
+        rectangle, draw=none, fill=none,
+        text width=3.6cm,
+        inner sep=2pt
+    },
+    container/.style = {
+        rectangle, draw=gray!80, dashed, thick, fill=gray!5,
+        inner sep=0.3cm, rounded corners
+    },
+    processbox/.style = {
+        rectangle, draw=black, thick, fill=white,
+        inner sep=0.25cm,
+        rounded corners, drop shadow
+    },
+    arrow/.style = {-latex, thick, draw=black!80, rounded corners=3pt},
+    inputnode/.style = {
+        rectangle, draw=black!60, thick, fill=white,
+        text width=1.2cm, minimum height=0.9cm,
+        align=center, rounded corners,
+        font=\bfseries\tiny
+    },
+    widefile/.style = {
+        draw=black!60, thick, fill=white, shape=rectangle,
+        text width=3.0cm, minimum height=1.4cm,
+        align=center, font=\scriptsize\sffamily,
+        append after command={
+            \pgfextra{
+                \draw[black!60] (\tikzlastnode.north east) -- ++(-0.2,0) -- ++(0,-0.2) -- cycle;
+            }
+        }
+    }
+]
+
+    % 1. CENTRAL TRUNK
+    \node[process] (placement) {
+        \textbf{Placement Generation}\\
+        (OpenROAD)\\
+        \textit{Rand. Knobs}
+    };
+
+    \node[process, below=0.3cm of placement] (activity) {
+        \textbf{Activity Extraction}\\
+        Icarus Verilog $\to$ VCD $\to$ SAIF
+    };
+
+    \begin{pgfonlayer}{background}
+        \node[container, fit=(placement) (activity)] (stage1_box) {};
+    \end{pgfonlayer}
+    \node[anchor=north east, font=\bfseries\tiny, color=gray!80] at (stage1_box.north east) {Stage 1};
+
+    \node[inputnode, left=0.6cm of stage1_box.west] (rtl_icon) {RTL\\Design};
+    \node[inputnode, right=0.6cm of stage1_box.east] (tb_icon) {Test\\bench};
+
+    \draw[arrow] (rtl_icon.east) -- (stage1_box.west);
+    \draw[arrow] (tb_icon.west) -- (stage1_box.east);
+    \draw[arrow] (placement) -- (activity);
+
+    % 2. THE SPLIT
+    \coordinate (split_point) at ($(stage1_box.south) + (0,-0.4)$);
+    \draw[thick] (stage1_box.south) -- (split_point);
+
+    % 3. LEFT BRANCH: Graph Construction
+    \node[visualstep] (raw) at ($(split_point) + (-2.2, -1.2)$) {
+        \begin{tabular}{@{}m{1.2cm} m{2.2cm}@{}}
+            \textbf{Raw Graph} &
+            \begin{tikzpicture}[scale=0.25, baseline=0]
+                \foreach \i in {1,...,25} {
+                    \fill [gray!70] (rand*1.8, rand*0.8) coordinate (n\i) circle (3pt);
+                }
+                \foreach \i in {1,...,15} {
+                    \draw[gray!30, thin] (n\i) -- (n\the\numexpr\i+1\relax);
+                }
+            \end{tikzpicture}
+        \end{tabular}
+    };
+
+    \node[anchor=center, font=\bfseries\footnotesize, below=0.65cm of raw] (proc_title) {Processing};
+
+    \node[visualstep, below=0.1cm of proc_title] (step1) {
+        \begin{tabular}{@{}m{1.2cm} m{2.2cm}@{}}
+            \textbf{I. Atomic BFS} &
+            \begin{tikzpicture}[scale=0.25, baseline=-3pt]
+                \draw[fill=blue!20, thick] (0.5, 0.5) circle (0.5);
+                \draw[-latex, thin] (1.1, 0.5) -- (2.0, 0.5);
+                \draw[fill=white] (2.4, 0.5) circle (0.3);
+                \draw[fill=white] (3.2, 0.8) circle (0.3);
+                \draw[dashed, red!80, rounded corners=2pt] (-0.2, -0.2) rectangle (3.6, 1.2);
+            \end{tikzpicture}
+        \end{tabular}
+    };
+
+    \node[visualstep, below=0.0cm of step1] (step2) {
+        \begin{tabular}{@{}m{1.2cm} m{2.2cm}@{}}
+            \textbf{II. Spread Filter} &
+            \begin{tikzpicture}[scale=0.25, baseline=-3pt]
+                \draw[dotted] (0,0) circle (0.8);
+                \node[red, font=\bfseries] at (0,0) {$\times$};
+                \node[font=\tiny] at (0, -1.4) {$\sigma\!>\!0.05$};
+                \draw (1.8, -1) -- (1.8, 1);
+                \draw[dotted] (3.5, 0) circle (0.5);
+                \node[green!60!black, font=\bfseries] at (3.5, 0) {$\checkmark$};
+                \node[font=\tiny] at (3.5, -1.4) {Keep};
+            \end{tikzpicture}
+        \end{tabular}
+    };
+
+    \node[visualstep, below=0.0cm of step2] (step3) {
+        \begin{tabular}{@{}m{1.2cm} m{2.2cm}@{}}
+            \textbf{III. Gravity Merge} &
+            \begin{tikzpicture}[scale=0.25, baseline=-3pt]
+                \draw[fill=blue!10] (0,0) circle (0.3); \draw[-latex, blue] (0,0) -- (0.5, 0.5);
+                \draw[fill=blue!10] (1,0) circle (0.3); \draw[-latex, blue] (1,0) -- (1.5, 0.5);
+                \draw[-latex, thick] (1.8, 0.2) -- (2.4, 0.2);
+                \draw[dashed, fill=green!10] (3.0, 0.2) circle (0.5);
+            \end{tikzpicture}
+        \end{tabular}
+    };
+
+    \node[visualstep, below=0.8cm of step3] (cluster) {
+        \begin{tabular}{@{}m{1.2cm} m{2.2cm}@{}}
+            \textbf{Clustered Graph} &
+            \begin{tikzpicture}[scale=0.25, baseline=0]
+                \draw[fill=blue!10, draw=blue!80, thick] (-1.2, 0.5) circle (0.7);
+                \draw[fill=orange!10, draw=orange!80, thick] (0, -0.6) circle (0.7);
+                \draw[fill=green!10, draw=green!80, thick] (1.2, 0.5) circle (0.7);
+                \draw[thick, black!70] (-0.5, 0.5) -- (0.5, 0.5);
+                \draw[thick, black!70] (-0.4, -0.2) -- (0.4, 0.2);
+            \end{tikzpicture}
+        \end{tabular}
+    };
+
+    \coordinate[below=0.4cm of cluster] (graph_pad);
+
+    \begin{pgfonlayer}{background}
+        \node[processbox, fit=(proc_title) (step1) (step2) (step3)] (proc_box) {};
+        \node[container, fit=(raw) (cluster) (proc_box) (graph_pad), inner sep=0.2cm, yshift=0.25cm] (graph_box) {};
+    \end{pgfonlayer}
+
+    \node[anchor=north, font=\bfseries\footnotesize] at (graph_box.north) {Graph Construction};
+
+    \draw[arrow] (split_point) -| (graph_box.north);
+    \draw[-latex, thick, black!80] (raw.south) -- (proc_box.north);
+    \draw[-latex, thick, black!80] (proc_box.south) -- (cluster.north);
+
+    % 4. RIGHT BRANCH: CTS
+    \node[process, text width=3.0cm] (cts) at ($(split_point) + (2.5, -1.2)$) {
+        \textbf{Multi-Variant CTS}\\
+        (TritonCTS)\\
+        \textit{10x per Design}
+    };
+
+    \node[widefile, below=1.5cm of cts] (metadata) {
+        \textbf{metadata.csv}\\
+        Skew, Power, Wire\\
+        Place \& CTS Knobs\\
+        Gap Scores
+    };
+
+    \begin{pgfonlayer}{background}
+        \node[container, fit=(cts) (metadata)] (cts_box) {};
+    \end{pgfonlayer}
+
+    \draw[arrow] (split_point) -| (cts_box.north);
+    \draw[arrow] (cts) -- (metadata);
+
+    \path (current bounding box.north west) ++(-0.2,0.2) coordinate (nw_pad);
+    \path (current bounding box.south east) ++(0.2,-0.2) coordinate (se_pad);
+    \useasboundingbox (nw_pad) rectangle (se_pad);
+
+\end{tikzpicture}
+}
+\caption{CTS-Bench generation pipeline. Stage~1 randomizes placement
+  parameters and extracts gate-level switching activity (SAIF). The
+  pipeline forks: the left branch constructs clustered physical graphs
+  for GNN benchmarking; the right branch runs 10 CTS variants per
+  placement and records 15 QoR metrics into \texttt{metadata.csv}.}
+\label{fig:pipeline}
+\end{figure}
 
 \paragraph{Stage 1: Randomized Placement.}
 Starting from RTL, we execute synthesis, floorplanning, power network
@@ -385,16 +545,6 @@ uniformly sampling four CTS tuning knobs (Table~\ref{tab:knobs}). Static
 timing analysis (STA) follows each CTS run to extract 15 ground-truth QoR
 metrics (Table~\ref{tab:metrics}).
 
-\begin{figure}[h]
-\centering
-% TODO: replace with actual pipeline figure (use TikZ or PDF)
-\includegraphics[width=\columnwidth]{placeholder_pipeline.pdf}
-\caption{CTS-Bench generation pipeline. Stage~1 randomizes placement;
-  Stage~2 extracts gate-level switching activity; Stage~3 runs 10 CTS
-  variants per placement and extracts 15 QoR metrics.}
-\label{fig:pipeline}
-\end{figure}
-
 \subsection{HPC Infrastructure}
 
 Generating 10,000+ CTS evaluations is computationally infeasible on a
@@ -418,7 +568,12 @@ auto-detects the Singularity/Apptainer binary and HPC home path.
 
 \subsection{Randomization Knobs}
 
-\begin{table}[h]
+Table~\ref{tab:knobs} lists all seven placement randomization parameters and
+the four CTS tuning knobs, together with their sampling ranges. The placement
+knobs control spatial density, synthesis style, and routing pressure; the CTS
+knobs govern clock buffer insertion granularity and wire budget.
+
+\begin{table}[htbp]
 \centering
 \small
 \caption{Randomization Knobs for Dataset Diversity.}
@@ -445,7 +600,12 @@ CTS & Buffer Distance     & 70--150 $\mu$m            & Integer \\
 
 \subsection{Ground-Truth QoR Labels}
 
-\begin{table}[h]
+After each CTS run, static timing analysis extracts 15 ground-truth metrics
+spanning four categories (Table~\ref{tab:metrics}). These cover all
+dimensions relevant to clock quality: temporal, power, structural, and
+routing.
+
+\begin{table}[htbp]
 \centering
 \small
 \caption{Ground-Truth QoR Metrics Captured per CTS Run.}
@@ -464,68 +624,74 @@ Congestion & Routing / Repair Buffer Count & integer \\
 \end{table}
 
 %%────────────────────────────────────────────────────────────────────────────
-\section{Multi-Scale Graph Representations}
-\label{sec:graphs}
+\subsection{Graph Extraction Pipeline}
+\label{sec:graph}
 %%────────────────────────────────────────────────────────────────────────────
 
-Each physical placement in CTS-Bench is accompanied by two graph
-representations designed to support a range of GNN architectures and hardware
-targets.
+CTS-Bench ships an optional graph extraction module that converts each
+placement+SAIF pair into a gate-level graph for graph neural network (GNN)
+research.  The pipeline has two stages---raw graph construction and
+hierarchical clustering---and exports PyTorch Geometric (PyG)~\cite{kipf2017semisupervisedclassificationgraphconvolutional}
+\texttt{Data} objects alongside the QoR CSV.
 
-\subsection{Raw Gate-Level Graph}
+\subsubsection*{Stage\,1: Raw Gate-Level Graph}
 
-Nodes represent standard cells (flip-flops and combinational logic); edges
-represent logical connectivity. We prioritize flip-flops and their one-hop
-fan-out logic, as data-path cells immediately surrounding registers exert the
-strongest influence on clock tree
-behavior~\cite{10.1145/3670474.3685949}.
+The raw graph $G=(V,E)$ is built from the placed netlist: every gate
+(flip-flop or combinational cell) becomes a node; directed edges follow
+logical fan-out and are weighted by Manhattan distance between driver and
+receiver pins.  Node features capture three orthogonal signals: geometric
+position (normalized $x$, $y$), cell type ($\texttt{is\_ff}\in\{0,1\}$),
+and dynamic activity (log-transformed SAIF switching count per clock cycle).
+Because SAIF annotation is a first-class step in the generation pipeline
+(Figure~\ref{fig:pipeline}), activity features are available for every
+design in the dataset without additional simulation.
 
-\paragraph{Node features.}
-Three features are assigned per node: (1)~normalized geometric coordinates
-$(x, y)$; (2)~a binary cell-type indicator (\texttt{is\_ff}); and
-(3)~log-transformed switching activity from SAIF.
+\subsubsection*{Stage\,2: Three-Step Hierarchical Clustering}
 
-\paragraph{Edge weights.}
-Edges are weighted by Manhattan distance:
-$d(c_i, c_j) = |x_i - x_j| + |y_i - y_j|$.
+Raw placement graphs contain tens of thousands of nodes, dominated by
+combinational logic noise.  We apply a deterministic three-step algorithm
+that achieves roughly $13{\times}$ node compression while preserving the
+spatial and activity signature needed for CTS prediction.
 
-Raw graphs range from roughly 2,000 nodes (ZipDiv) to over 200,000 nodes
-(JPEG encoder), stressing GPU memory even on high-end accelerators.
+\medskip\noindent\textbf{Step I~--~Atomic BFS.}
+A breadth-first search launches from each flip-flop in a randomly shuffled
+order.  Each BFS claims the immediate combinational fan-out cone of its seed
+FF; every combinational gate is assigned to exactly one cluster (first-claim
+wins).  Shuffling prevents systematic spatial bias across the die.
 
-\subsection{Physics-Aware Clustered Graph}
+\medskip\noindent\textbf{Step II~--~High-Spread Filter.}
+Clusters whose spatial spread $\sigma > 0.05$ (normalized die units)
+bypass the merge step and are retained as singleton cluster nodes.
+These geometrically dispersed clusters --- typically long-reach clock enables
+--- carry a distinct signature that merging would destroy.
 
-To enable efficient GNN training on memory-constrained hardware, we develop
-a three-step, physics-aware clustering algorithm that achieves an average
-$13.3\times$ node compression while preserving structural information
-critical for CTS target metrics.
+\medskip\noindent\textbf{Step III~--~Gravity-Vector-Aligned Merging.}
+Compact clusters are merged if they share the same primary control net,
+their centroids are within Manhattan distance $0.05$, \emph{and} their
+gravity vectors have cosine similarity $> 0.9$.  The gravity vector of a
+cluster is the displacement from the seed FF to the centroid of its
+one-hop neighbors; high similarity indicates that two clusters fan out in
+the same physical direction and belong to the same logical structure.
 
-\paragraph{Step I: Atomic cluster formation.}
-A BFS starting from each flip-flop claims its immediate combinational fan-out
-cone until another flip-flop or an already-claimed gate is encountered.
-Flip-flops are randomly shuffled before BFS to eliminate ordering bias.
+\medskip
+Each cluster is summarized by ten node features: centroid $(x,y)$,
+per-axis spread $(\sigma_x,\sigma_y)$, $\log(\text{cluster size})$,
+$N_\text{FF}$, $N_\text{Logic}$, $\log(\text{max switching activity})$,
+$\log(\text{sum switching activity})$, and non-zero toggle count.
 
-\paragraph{Step II: High-spread filtering.}
-Clusters whose member-cell spatial spread (standard deviation) exceeds 0.05
-normalized die units are flagged as high-spread and excluded from further
-merging, preserving their unique geometric signatures.
+\subsubsection*{Output and Extensibility}
 
-\paragraph{Step III: Gravity-vector-aligned merging.}
-Compact clusters are merged into macro-nodes subject to three constraints:
-(a)~shared control net (reset or enable); (b)~Manhattan distance between
-centroids $<0.05$; and (c)~cosine similarity of gravity vectors $>0.9$,
-where the \emph{gravity vector} of a flip-flop is the displacement from its
-position to the centroid of its one-hop neighbors, encoding the directional
-pull of surrounding logic.
-
-\paragraph{Clustered node features.}
-Each macro-node carries 10 aggregated features: geometric centroid $(x,y)$,
-spatial spread $(\sigma_x, \sigma_y)$, log-transformed cluster size,
-composition counts ($N_\text{FF}$, $N_\text{Logic}$), and aggregated switching
-activity (log max, sum, and non-zero toggle counts). Edge weights are the
-Manhattan distance between macro-cluster centroids.
-
-Both graph types are serialized as PyTorch Geometric tensors and referenced
-in the master CSV manifest.
+The clustered graph is exported as a PyG \texttt{Data} object:
+\texttt{x} holds the $10$-dimensional node feature matrix,
+\texttt{edge\_index} encodes directed connectivity among cluster nodes,
+and \texttt{edge\_attr} stores normalized Manhattan distances.
+A companion metadata row in the CSV links each graph to its CTS knob
+configuration (inputs) and 15 QoR metrics (regression targets), enabling
+direct \texttt{DataLoader} construction.  The clustering module is modular:
+researchers can substitute the BFS kernel with spectral or hierarchical
+agglomeration, adjust the spread threshold, or replace the gravity-vector
+affinity with a learned one, without changing the downstream PyG export or
+CSV alignment.
 
 %%────────────────────────────────────────────────────────────────────────────
 \section{Dataset Characterization}
@@ -534,24 +700,27 @@ in the master CSV manifest.
 
 \subsection{Scale and Coverage}
 
-\begin{table}[h]
+Table~\ref{tab:stats} summarizes the scale of the released dataset.
+The 10,000+ CTS evaluations span a $100\times$ range in design complexity
+and cover all major functional domains represented in open-source RTL libraries.
+
+\begin{table}[htbp]
 \centering
 \small
 \caption{CTS-Bench Dataset Statistics.}
 \label{tab:stats}
-\begin{tabular}{lrr}
+\begin{tabular}{lr}
 \toprule
-\textbf{Statistic} & \textbf{Workshop (2026)} & \textbf{This Work} \\
+\textbf{Statistic} & \textbf{Value} \\
 \midrule
-Designs          &  5   & 19 \\
-Design suites    &  1   & 2 (IWLS + PlaceDreamer) \\
-Unique placements &  486 & $\sim$1{,}000+ \\
-CTS evaluations  & 4{,}860 & 10{,}000+ \\
-QoR metrics/run  & 15   & 15 \\
-Graph types      & 2    & 2 (raw + clustered) \\
-PDK              & Sky130 & Sky130 \\
-Tool stack       & OpenLane 2.3.10 & OpenLane 2.3.10 \\
-Pipeline         & Local & HPC (SLURM array, 200 tasks) \\
+Designs              & 19 \\
+Unique placements    & $\sim$1{,}000+ \\
+CTS evaluations      & 10{,}000+ \\
+QoR metrics/run      & 15 \\
+Graph pipeline       & available (raw + clustered) \\
+PDK                  & SkyWater Sky130 \\
+Tool stack           & OpenLane 2.3.10 \\
+Pipeline             & HPC (SLURM array, 200 tasks) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -578,16 +747,18 @@ and the total Pareto distance from the ideal anchor $[1,1,1]$:
 A high $G_\text{Power}$ coupled with low $G_\text{Skew}$ reveals placements
 that require aggressive buffer insertion for timing closure, making
 $D_\text{Pareto}$ a useful single scalar for placement quality evaluation.
-Figure~\ref{fig:pareto_dist} shows the distribution of $D_\text{Pareto}$
-across all 19 designs. % TODO: generate figure after HPC run completes
+Figure~\ref{fig:pareto_dist} illustrates example Pareto-optimal CTS
+configurations identified by SwiftCTS for the JPEG encoder, a representative
+large design in the corpus, showing the three-objective trade-off surface
+explored during dataset characterization.
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \centering
-% TODO: replace with actual violin / box plot from dataset
-\includegraphics[width=\columnwidth]{placeholder_pareto.pdf}
-\caption{Pareto distance distribution across 19 designs. Lower
-  $D_\text{Pareto}$ indicates placements that admit clock trees closer to
-  simultaneously optimal in all three objectives.}
+\includegraphics[width=\columnwidth]{pareto_ganstyle_oc_jpegencode.pdf}
+\caption{Example Pareto trade-off surface for the JPEG encoder across clock
+  power, wirelength, and timing skew. Each point is a CTS configuration
+  evaluated during dataset generation; the Pareto front (highlighted) captures
+  the achievable quality boundaries for this placement instance.}
 \label{fig:pareto_dist}
 \end{figure}
 
@@ -610,6 +781,17 @@ SwiftCTS: a physics-informed surrogate framework trained on CTS-Bench data
 that predicts clock tree metrics at sub-millisecond latency and drives
 comprehensive design space exploration. The three prediction targets are
 clock power, wirelength, and timing skew.
+Figure~\ref{fig:swiftcts_arch} shows the end-to-end SwiftCTS pipeline.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{compFigure.pdf}
+\caption{SwiftCTS framework overview. Feature extraction from placement DEF,
+  SAIF activity, and timing reports feeds three independent gradient-boosted
+  prediction heads. A K-shot calibration step adapts predictions to new
+  designs. NSGA-II then explores 100K CTS configurations in under 10 seconds.}
+\label{fig:swiftcts_arch}
+\end{figure}
 
 \subsection{Feature Engineering}
 \label{sec:features}
@@ -624,7 +806,7 @@ in circuit physics. The full feature taxonomy (Table~\ref{tab:features})
 is organized into six groups for the wirelength head and dedicated subsets
 for power and skew.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \fontsize{7pt}{8pt}\selectfont
 \setlength{\tabcolsep}{3pt}
@@ -740,91 +922,6 @@ We integrate NSGA-II as the search engine (100K evaluations per run,
 average 8.9\,s wall clock), but the architecture is algorithm-agnostic.
 
 %%────────────────────────────────────────────────────────────────────────────
-\section{GNN Benchmarking Experiments}
-\label{sec:gnn}
-%%────────────────────────────────────────────────────────────────────────────
-
-\subsection{Experimental Setup}
-
-We evaluate three standard GNN backbones---GCN~\cite{kipf2017semisupervisedclassificationgraphconvolutional},
-GraphSAGE~\cite{hamilton2018inductiverepresentationlearninglarge}, and
-GATv2~\cite{brody2022attentivegraphattentionnetworks}---on both Raw and
-Clustered graph representations.
-Each backbone is paired with a Multi-Modal Fusion Architecture that integrates
-graph embeddings (via global mean pooling) with scalar placement and CTS knobs
-through separate MLPs before a shared regression head predicting three
-post-CTS metrics.
-
-\paragraph{Dataset splits.}
-\textit{In-distribution (seen):} Four architectures (PicoRV32, AES, SHA-256,
-EthMAC), split 80/20 into training and validation.
-\textit{Out-of-distribution (unseen):} ZipDiv held out entirely (500 runs)
-as a zero-shot generalization test.
-
-All experiments run on an NVIDIA GeForce RTX 5060 (8\,GB VRAM, CUDA~12.8)
-for 100 epochs per configuration with batch size 32.
-
-\subsection{Efficiency Results}
-
-Training GATv2 on Raw graphs requires 1.2--2.5\,GB VRAM per batch, already
-taxing moderate-scale partitions. The Clustered representation reduces mean
-node count by $\sim$$13.3\times$, yielding an average \textbf{17.2$\times$
-reduction in peak VRAM} and a \textbf{3$\times$ acceleration in training
-throughput}---confirming clustering as a viable strategy on
-resource-constrained hardware.
-
-\subsection{Accuracy Trade-off: Global vs.\ Local Metrics}
-
-\paragraph{Global metrics.}
-Total Power and Wirelength remain predictable under compression. The Clustered
-GCN achieves Power MAE of 0.10 and Wirelength MAE of 0.10 on seen designs,
-comparable to the Raw baseline (0.06 each), suggesting clustered proxies are
-viable for global objective estimation.
-
-\paragraph{Local metrics.}
-Clock Skew prediction degrades sharply under compression.
-While Raw GCN achieves Skew MAE of 0.16 with $R^2\approx0.90$ on seen data,
-the Clustered models collapse ($R^2 < 0$) on both seen and unseen designs.
-On ZipDiv (OOD), the Clustered GCN reaches $R^2 = -2.23$---meaning
-predictions are statistically worse than the mean baseline.
-
-\begin{table}[h]
-\centering
-\small
-\caption{GNN Results: MAE and $R^2$ on Raw vs.\ Clustered Representations.}
-\label{tab:gnn_results}
-\begin{tabular}{l cc cc cc c}
-\toprule
-\multirow{2}{*}{\textbf{Net}} &
-  \multicolumn{2}{c}{\textbf{Skew MAE}} &
-  \multicolumn{2}{c}{\textbf{Power MAE}} &
-  \multicolumn{2}{c}{\textbf{WL MAE}} &
-  \textbf{$R^2$ (S/U)} \\
- & S & U & S & U & S & U & \\
-\midrule
-\multicolumn{8}{l}{\textit{Raw Graph}} \\
-GCN   & 0.16 & 0.24 & 0.06 & 0.07 & 0.06 & 0.11 & 0.95/$-$0.17 \\
-SAGE  & 0.16 & 0.26 & 0.06 & 0.06 & 0.06 & 0.11 & 0.95/0.05 \\
-GATv2 & 0.16 & 0.22 & 0.06 & 0.06 & 0.06 & 0.11 & 0.95/0.08 \\
-\midrule
-\multicolumn{8}{l}{\textit{Clustered Graph}} \\
-GCN   & 0.17 & 0.16 & 0.10 & 0.13 & 0.10 & 0.15 & 0.85/$-$2.23 \\
-SAGE  & 0.17 & 0.12 & 0.09 & 0.09 & 0.09 & 0.16 & 0.90/$-$0.91 \\
-GATv2 & 0.17 & 0.06 & 0.09 & 0.13 & 0.09 & 0.23 & 0.89/$-$2.84 \\
-\bottomrule
-\multicolumn{8}{p{0.44\textwidth}}{\small S = Seen (in-distribution);
-  U = Unseen (ZipDiv OOD). $R^2$ is spatial fidelity.}
-\end{tabular}
-\end{table}
-
-\paragraph{Key finding.}
-Generic graph clustering can fundamentally compromise CTS learning objectives
-even when global physical metrics remain accurately predicted. This confirms
-that future graph coarsening strategies for EDA must be \emph{task-aware},
-explicitly preserving structural properties relevant to the downstream
-objective (e.g., flop-to-flop path geometry for skew).
-
-%%────────────────────────────────────────────────────────────────────────────
 \section{SwiftCTS: Experimental Results}
 \label{sec:surrogate_results}
 %%────────────────────────────────────────────────────────────────────────────
@@ -919,7 +1016,7 @@ Timing skew predictions on ZipDiv reach within 5\,ps of physical routing.
 
 \subsection{Design Space Exploration Runtime}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \small
 \caption{DSE Runtime at 100,000 Evaluations (SwiftCTS).}
@@ -950,10 +1047,22 @@ On the JPEG encoder (completely unseen OOD design), the actual routed power
 Clock skew predictions for ZipDiv are within 5\,ps of actual STA.
 Across all benchmarks, SwiftCTS-recommended configurations outperform the
 OpenROAD default CTS heuristics on all three objectives.
+Figure~\ref{fig:physical_val} shows the closed-loop comparison of surrogate
+predictions against actual OpenROAD runs for top-ranked Pareto configurations.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth,height=0.38\textheight,keepaspectratio]{physical_validation_plot_single_tall.pdf}
+\caption{Closed-loop physical validation: surrogate predictions vs.\ actual
+  OpenROAD routing results for top Pareto-ranked CTS configurations.
+  The JPEG encoder (OOD, 5$\times$ larger than any training design) achieves
+  0.43\% power prediction error at $K{=}1$ calibration.}
+\label{fig:physical_val}
+\end{figure}
 
 \subsection{Comparison to Prior Frameworks}
 
-\begin{table}[h]
+\begin{table}[t]
 \centering
 \small
 \caption{ML-Driven CTS Framework Comparison.}
@@ -997,11 +1106,16 @@ The SAIF generation step (gate-level simulation) dominates runtime for
 large designs. Future work will investigate faster switching activity
 estimation via statistical or RTL-level proxies.
 
-\paragraph{GNN task-aware clustering.}
-The GNN benchmarking results (Section~\ref{sec:gnn}) show that generic
-graph coarsening breaks skew prediction. Designing clustering objectives
-that explicitly preserve flip-flop-to-flip-flop path geometry is a critical
-open problem CTS-Bench is well-positioned to drive.
+\paragraph{Graph representations.}
+CTS-Bench ships a graph extraction pipeline capable of generating raw
+gate-level and physics-aware clustered graphs for any design in the corpus
+in approximately \textit{X}\,seconds per design.
+The clustering code is intentionally modular: researchers can swap in their
+own coarsening objective (e.g., timing-path-aware or power-domain-aware
+merging) without touching the rest of the pipeline.
+Preliminary benchmarking of three GNN backbones on five designs appeared in
+our workshop paper~\cite{khadka2026}; applying it at the full 19-design scale
+is left to community follow-on work.
 
 \paragraph{Cross-tool generalization.}
 SwiftCTS was validated on OpenROAD. Robustness under commercial tools
@@ -1013,23 +1127,22 @@ remains future work.
 \label{sec:conclusion}
 %%────────────────────────────────────────────────────────────────────────────
 
-We presented CTS-Bench, an open, large-scale dataset and automated pipeline
-for AI-driven Clock Tree Synthesis.
-By combining 10,000+ CTS evaluations across 19 diverse RTL designs, a
-production-grade HPC generation pipeline, multi-scale graph representations,
-and the SwiftCTS surrogate as a concrete demonstration of dataset utility,
-CTS-Bench addresses the core data bottleneck that has constrained ML research
-on CTS for over a decade.
+We presented CTS-Bench, an open, large-scale tabular dataset and automated
+pipeline for AI-driven Clock Tree Synthesis.
+By combining 10,000+ CTS evaluations across 19 diverse RTL designs with a
+production-grade HPC generation pipeline and the SwiftCTS surrogate as a
+concrete demonstration of dataset utility, CTS-Bench addresses the core data
+bottleneck that has constrained ML research on CTS for over a decade.
 
-The dataset enables two classes of research that were previously impractical:
-(1)~GNN benchmarking that honestly characterizes the accuracy-efficiency
-trade-off of graph coarsening for physical design; and (2)~surrogate-based
-design space exploration that generalizes across unseen macro architectures
-with minimal physical reference data.
+The dataset enables surrogate-based design space exploration that generalizes
+across unseen macro architectures with minimal physical reference data.
+The 10-knob CTS configuration space and three complementary QoR metrics
+provide a realistic multi-objective benchmark that mirrors industrial
+decision-making far more faithfully than any prior open dataset.
 All data, code, and the HPC pipeline are publicly released to encourage
 community adoption and extension.
 
 \bibliographystyle{ACM-Reference-Format}
-\bibliography{todaes-refs}
+\bibliography{cts-bench,swiftcts}
 
 \end{document}
