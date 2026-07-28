@@ -29,6 +29,15 @@ export PDK_ROOT="${PDK_ROOT:-${HOME}/pdk/sky130}"
 export PDK_HASH="0fe599b2afb6708d281543108caf8310912f54af"
 export SKY130_PDK="${PDK_ROOT}/volare/sky130/versions/${PDK_HASH}"
 
+# ASAP7 — set ASAP7_PDK to the installed PDK root (e.g. ~/pdk/asap7)
+export ASAP7_PDK="${ASAP7_PDK:-${HOME}/pdk/asap7}"
+
+# NanGate45 — set NANGATE45_PDK to the installed PDK root (e.g. ~/pdk/nangate45)
+export NANGATE45_PDK="${NANGATE45_PDK:-${HOME}/pdk/nangate45}"
+
+# Active PDK for this run — override per sbatch: export ACTIVE_PDK=asap7
+export ACTIVE_PDK="${ACTIVE_PDK:-sky130A}"
+
 # ── Singularity ───────────────────────────────────────────────────────────────
 # Path to the OpenLane 2.3.10 singularity image (pull once with setup.sh)
 export OPENLANE_SIF="${OPENLANE_SIF:-${HOME}/singularity/openlane2-2.3.10.sif}"

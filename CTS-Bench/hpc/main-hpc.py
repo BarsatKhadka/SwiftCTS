@@ -31,6 +31,33 @@ CONTAINER_CMD  = os.environ.get("CONTAINER_CMD",  "apptainer" if shutil.which("a
 LOG_FILE       = os.environ.get("LOG_FILE", os.path.join(DATASET_ROOT, "experiment_log.csv"))
 KEPT_FILES_DIR = os.path.join(DATASET_ROOT, "placement_files")
 
+# ── Active PDK (override with: export ACTIVE_PDK=asap7) ──────────────────────
+ACTIVE_PDK = os.environ.get("ACTIVE_PDK", "sky130A")
+
+PDK_PROFILES = {
+    "sky130A": {
+        "pdk":              "sky130A",
+        "scl":              "sky130_fd_sc_hd",
+        "pdk_root":         SKY130_PDK,
+        "clock_period_mult": 1.0,   # baseline: 10 ns designs stay at 10 ns
+    },
+    "asap7": {
+        "pdk":              "asap7",
+        "scl":              "asap7sc7p5t_28_R",
+        "pdk_root":         os.environ.get("ASAP7_PDK", os.path.join(os.path.expanduser("~"), "pdk", "asap7")),
+        "clock_period_mult": 0.05,  # 7 nm predictive: 10 ns → 0.5 ns
+    },
+    "nangate45": {
+        "pdk":              "nangate45",
+        "scl":              "NangateOpenCellLibrary",
+        "pdk_root":         os.environ.get("NANGATE45_PDK", os.path.join(os.path.expanduser("~"), "pdk", "nangate45")),
+        "clock_period_mult": 0.25,  # 45 nm: 10 ns → 2.5 ns
+    },
+}
+
+if ACTIVE_PDK not in PDK_PROFILES:
+    sys.exit(f"Unknown ACTIVE_PDK='{ACTIVE_PDK}'. Choose from: {list(PDK_PROFILES)}")
+
 DESIGN_CONFIG = {
     # IWLS designs
     "usb_phy":   {"clock_period": 10.0, "clock_port": "clk",       "top_module": "usb_phy"},
@@ -56,7 +83,7 @@ DESIGN_CONFIG = {
 }
 
 CSV_HEADER = [
-    "run_id", "placement_id", "design_name",
+    "run_id", "placement_id", "design_name", "pdk_name",
     "aspect_ratio", "core_util", "density", "synth_strategy",
     "io_mode", "time_driven", "routability_driven",
     "cts_max_wire", "cts_buf_dist", "cts_cluster_size", "cts_cluster_dia",
@@ -108,7 +135,7 @@ def save_essential_files(placement_id, design_name):
     return saved
 
 
-def log_to_shard(task_id, placement_id, saved_paths):
+def log_to_shard(task_id, placement_id, saved_paths, pdk_name):
     shard_path = os.path.join(SHARDS_DIR, f"shard_{task_id:05d}.csv")
     write_header = not os.path.exists(shard_path)
 
@@ -146,6 +173,7 @@ def log_to_shard(task_id, placement_id, saved_paths):
                 "",  # run_id filled by merge script
                 placement_id,
                 pl_stats.get("design_name", ""),
+                pdk_name,
                 pl_stats.get("aspect_ratio", ""),
                 pl_stats.get("core_util", ""),
                 pl_stats.get("density", ""),
@@ -189,10 +217,14 @@ def delete_run(placement_id):
 
 def run_iteration(task_id, design_name):
     cfg          = DESIGN_CONFIG[design_name]
-    clock_period = cfg["clock_period"]
+    pdk_prof     = PDK_PROFILES[ACTIVE_PDK]
+    clock_period = round(cfg["clock_period"] * pdk_prof["clock_period_mult"], 4)
     clock_port   = cfg["clock_port"]
     top_module   = cfg["top_module"]
     max_core_util = cfg.get("max_core_util", 70)
+    pdk_root     = pdk_prof["pdk_root"]
+
+    print(f"  PDK={ACTIVE_PDK}  clock_period={clock_period}ns")
 
     placement_id = None
     try:
@@ -204,6 +236,7 @@ def run_iteration(task_id, design_name):
                 "python3",
                 os.path.join(CTS_BENCH_ROOT, "hpc", "scripts", "1-gen-placement.py"),
                 design_name, str(clock_period), clock_port, top_module, str(max_core_util),
+                pdk_prof["pdk"], pdk_prof["scl"], pdk_root,
             ], cwd=CTS_BENCH_ROOT, capture_output=True, text=True)
             print(r.stdout)
             if r.stderr:
@@ -237,10 +270,12 @@ def run_iteration(task_id, design_name):
         subprocess.run([
             CONTAINER_CMD, "exec",
             "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
-            "--bind", f"{PDK_ROOT}:{PDK_ROOT}",
+            "--bind", f"{pdk_root}:{pdk_root}",
             "--pwd",  CTS_BENCH_ROOT,
-            "--env",  f"PDK_ROOT={PDK_ROOT}",
-            "--env",  f"SKY130_PDK={SKY130_PDK}",
+            "--env",  f"PDK_ROOT={pdk_root}",
+            "--env",  f"ACTIVE_PDK={ACTIVE_PDK}",
+            "--env",  f"ACTIVE_SCL={pdk_prof['scl']}",
+            "--env",  f"ACTIVE_PDK_ROOT={pdk_root}",
             OPENLANE_SIF,
             "python3", "hpc/scripts/5-run-cts.py",
             placement_id, top_module, str(clock_period), clock_port,
@@ -264,7 +299,7 @@ def run_iteration(task_id, design_name):
     saved = save_essential_files(placement_id, top_module)
 
     # 6. Log to shard CSV
-    log_to_shard(task_id, placement_id, saved)
+    log_to_shard(task_id, placement_id, saved, ACTIVE_PDK)
 
     # 7. Cleanup
     delete_run(placement_id)

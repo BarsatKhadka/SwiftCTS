@@ -111,7 +111,8 @@ exit
     return output_csv
 
 
-def run_single_experiment(design_name, clock_period, clock_port, top_module=None, max_core_util=70):
+def run_single_experiment(design_name, clock_period, clock_port, top_module=None, max_core_util=70,
+                          active_pdk="sky130A", active_scl="sky130_fd_sc_hd", active_pdk_root=None):
     verilog_files = sorted(glob.glob(os.path.join(CTS_BENCH_ROOT, "designs", design_name, "rtl", "*.v")))
     if not verilog_files:
         raise FileNotFoundError(f"No RTL files for {design_name}")
@@ -139,8 +140,8 @@ def run_single_experiment(design_name, clock_period, clock_port, top_module=None
         "PL_TARGET_DENSITY": pl_density,
         "PL_TIME_DRIVEN": time_driven,
         "PL_ROUTABILITY_DRIVEN": routability_driven,
-        "PDK": "sky130A",
-        "STD_CELL_LIBRARY": "sky130_fd_sc_hd",
+        "PDK": active_pdk,
+        "STD_CELL_LIBRARY": active_scl,
         "ERROR_ON_SYNTH_CHECKS": False,
     }
     if design_name in DESIGNS_WITH_INCLUDES:
@@ -150,13 +151,14 @@ def run_single_experiment(design_name, clock_period, clock_port, top_module=None
     with open(config_path, "w") as f:
         json.dump(config, f, indent=4)
 
-    print(f"Running OpenLane ({CONTAINER_CMD}) for {design_name} tag={tag}")
+    pdk_root_bind = active_pdk_root or PDK_ROOT
+    print(f"Running OpenLane ({CONTAINER_CMD}) for {design_name} pdk={active_pdk} tag={tag}")
     result = subprocess.run([
         CONTAINER_CMD, "exec",
         "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
-        "--bind", f"{PDK_ROOT}:{PDK_ROOT}",
+        "--bind", f"{pdk_root_bind}:{pdk_root_bind}",
         "--pwd",  CTS_BENCH_ROOT,
-        "--env",  f"PDK_ROOT={PDK_ROOT}",
+        "--env",  f"PDK_ROOT={pdk_root_bind}",
         OPENLANE_SIF,
         "python3", "-m", "openlane",
         "-T", "OpenROAD.DetailedPlacement",
@@ -165,7 +167,7 @@ def run_single_experiment(design_name, clock_period, clock_port, top_module=None
         "-S", "Checker.LintErrors",
         "-S", "Checker.LintWarnings",
         "-S", "Checker.YosysSynthChecks",
-        "--pdk-root", SKY130_PDK,
+        "--pdk-root", pdk_root_bind,
         "--run-tag", tag,
         config_path,
     ], cwd=CTS_BENCH_ROOT)
@@ -206,11 +208,16 @@ def run_single_experiment(design_name, clock_period, clock_port, top_module=None
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: python3 1-gen-placement.py <design_name> <clock_period> <clock_port> [top_module] [max_core_util]")
+        print("Usage: python3 1-gen-placement.py <design_name> <clock_period> <clock_port> "
+              "[top_module] [max_core_util] [pdk] [scl] [pdk_root]")
         sys.exit(1)
-    design_name   = sys.argv[1]
-    clock_period  = float(sys.argv[2])
-    clock_port    = sys.argv[3]
-    top_module    = sys.argv[4] if len(sys.argv) > 4 else None
-    max_core_util = int(sys.argv[5]) if len(sys.argv) > 5 else 70
-    run_single_experiment(design_name, clock_period, clock_port, top_module, max_core_util)
+    design_name    = sys.argv[1]
+    clock_period   = float(sys.argv[2])
+    clock_port     = sys.argv[3]
+    top_module     = sys.argv[4] if len(sys.argv) > 4 else None
+    max_core_util  = int(sys.argv[5])   if len(sys.argv) > 5 else 70
+    active_pdk     = sys.argv[6]        if len(sys.argv) > 6 else "sky130A"
+    active_scl     = sys.argv[7]        if len(sys.argv) > 7 else "sky130_fd_sc_hd"
+    active_pdk_root = sys.argv[8]       if len(sys.argv) > 8 else None
+    run_single_experiment(design_name, clock_period, clock_port, top_module, max_core_util,
+                          active_pdk, active_scl, active_pdk_root)

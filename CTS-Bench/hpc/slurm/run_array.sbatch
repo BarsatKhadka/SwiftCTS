@@ -49,6 +49,7 @@ echo "=== CTS-Bench task ${SLURM_ARRAY_TASK_ID} starting on $(hostname) ==="
 echo "    CTS_BENCH_ROOT : ${CTS_BENCH_ROOT}"
 echo "    OPENLANE_SIF   : ${OPENLANE_SIF}"
 echo "    SKY130_PDK     : ${SKY130_PDK}"
+echo "    ACTIVE_PDK     : ${ACTIVE_PDK}"
 echo "    SHARDS_DIR     : ${SHARDS_DIR}"
 echo "    singularity    : $(which singularity 2>/dev/null || echo NOT FOUND)"
 

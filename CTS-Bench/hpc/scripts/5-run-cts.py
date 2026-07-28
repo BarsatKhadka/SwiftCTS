@@ -22,9 +22,11 @@ else:
     sys.exit("Error: No Run Tag provided and latest_run.txt not found.")
 
 # PDK from env — set by singularity --env flags in main-hpc.py
-SKY130_PDK_ENV = os.environ.get("SKY130_PDK", "")
-PDK_ROOT_ENV   = os.environ.get("PDK_ROOT", os.path.expanduser("~/pdk/sky130"))
-MY_PDK_ROOT    = SKY130_PDK_ENV if SKY130_PDK_ENV else PDK_ROOT_ENV
+# ACTIVE_PDK / ACTIVE_SCL / ACTIVE_PDK_ROOT are injected by run_iteration()
+ACTIVE_PDK  = os.environ.get("ACTIVE_PDK",      "sky130A")
+ACTIVE_SCL  = os.environ.get("ACTIVE_SCL",      "sky130_fd_sc_hd")
+MY_PDK_ROOT = os.environ.get("ACTIVE_PDK_ROOT",
+              os.environ.get("PDK_ROOT", os.path.expanduser("~/pdk/sky130")))
 os.environ["PDK_ROOT"] = MY_PDK_ROOT
 
 
@@ -80,8 +82,8 @@ def run_cts_from_placement(DESIGN, clock_period, clock_port):
 
         config = {
             "DESIGN_NAME": DESIGN,
-            "PDK": "sky130A",
-            "STD_CELL_LIBRARY": "sky130_fd_sc_hd",
+            "PDK": ACTIVE_PDK,
+            "STD_CELL_LIBRARY": ACTIVE_SCL,
             "CLOCK_PORT": clock_port,
             "CLOCK_PERIOD": clock_period,
             **knobs,
@@ -91,8 +93,8 @@ def run_cts_from_placement(DESIGN, clock_period, clock_port):
             config=config,
             design_dir=".",
             pdk_root=MY_PDK_ROOT,
-            pdk="sky130A",
-            scl="sky130_fd_sc_hd",
+            pdk=ACTIVE_PDK,
+            scl=ACTIVE_SCL,
         )
         try:
             # _force_run_dir puts OpenLane output directly in target_dir so
