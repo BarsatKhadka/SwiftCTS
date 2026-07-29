@@ -123,17 +123,22 @@ export TNS_END_PERCENT   = 100
 export RESYNTH_TIMING_RECOVER = 0
 """)
 
+    # Source ORFS env.sh first so Yosys/OpenROAD binaries are in PATH
+    make_cmd = (
+        "source /OpenROAD-flow-scripts/env.sh && "
+        f"make -C /OpenROAD-flow-scripts/flow "
+        f"DESIGN_CONFIG={config_mk} "
+        f"RESULTS_DIR={results_dir} "
+        f"LOGS_DIR={logs_dir} "
+        f"REPORTS_DIR={reports_dir} "
+        "3_place"
+    )
     print(f"Running ORFS placement ({CONTAINER_CMD}) for {design_name} pdk={pdk} tag={tag}")
     result = subprocess.run([
         CONTAINER_CMD, "exec",
         "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
         ORFS_SIF,
-        "make", "-C", "/OpenROAD-flow-scripts/flow",
-        f"DESIGN_CONFIG={config_mk}",
-        f"RESULTS_DIR={results_dir}",
-        f"LOGS_DIR={logs_dir}",
-        f"REPORTS_DIR={reports_dir}",
-        "3_place",
+        "bash", "-c", make_cmd,
     ], cwd=run_dir)
 
     if result.returncode != 0:

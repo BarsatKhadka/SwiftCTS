@@ -29,7 +29,8 @@ ORFS_SIF      = os.environ.get("ORFS_SIF",     os.path.join(os.path.expanduser("
 CONTAINER_CMD = os.environ.get("CONTAINER_CMD", "apptainer" if shutil.which("apptainer") else "singularity")
 
 # ── PDK paths INSIDE the ORFS container ───────────────────────────────────────
-ORFS_FLOW = "/OpenROAD-flow-scripts/flow"
+ORFS_FLOW    = "/OpenROAD-flow-scripts/flow"
+OPENROAD_BIN = "/OpenROAD-flow-scripts/tools/install/OpenROAD/bin/openroad"
 
 PDK_CONTAINER_PATHS = {
     "asap7": {
@@ -221,7 +222,7 @@ def run_cts_sweep(placement_id, pdk):
             CONTAINER_CMD, "exec",
             "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
             ORFS_SIF,
-            "openroad", "-exit", tcl_path,
+            OPENROAD_BIN, "-exit", tcl_path,
         ], cwd=cts_dir)
 
         if result.returncode != 0:
