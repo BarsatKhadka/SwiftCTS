@@ -43,8 +43,7 @@ export ACTIVE_PDK="${ACTIVE_PDK:-sky130A}"
 export OPENLANE_SIF="${OPENLANE_SIF:-${HOME}/singularity/openlane2-2.3.10.sif}"
 
 # Path to OpenROAD-flow-scripts image (needed for ASAP7 / NanGate45 runs)
-# Pull with: apptainer pull ~/singularity/orfs.sif \
-#                docker://openroadproject/openroad-flow-scripts:latest
+# Pull with: apptainer pull ~/singularity/orfs.sif docker://openroad/orfs:latest
 export ORFS_SIF="${ORFS_SIF:-${HOME}/singularity/orfs.sif}"
 
 # ── Container runtime ─────────────────────────────────────────────────────────

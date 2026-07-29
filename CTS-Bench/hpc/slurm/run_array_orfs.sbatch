@@ -16,8 +16,7 @@
 #   python3 ~/SwiftCTS/CTS-Bench/hpc/slurm/merge_csvs.py
 #
 # Pull the ORFS container once (if not already done):
-#   apptainer pull ~/singularity/orfs.sif \
-#       docker://openroadproject/openroad-flow-scripts:latest
+#   apptainer pull ~/singularity/orfs.sif docker://openroad/orfs:latest
 # =============================================================================
 
 #SBATCH --job-name=ctsbench-orfs
