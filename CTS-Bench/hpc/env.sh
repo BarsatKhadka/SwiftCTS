@@ -42,6 +42,11 @@ export ACTIVE_PDK="${ACTIVE_PDK:-sky130A}"
 # Path to the OpenLane 2.3.10 singularity image (pull once with setup.sh)
 export OPENLANE_SIF="${OPENLANE_SIF:-${HOME}/singularity/openlane2-2.3.10.sif}"
 
+# Path to OpenROAD-flow-scripts image (needed for ASAP7 / NanGate45 runs)
+# Pull with: apptainer pull ~/singularity/orfs.sif \
+#                docker://openroadproject/openroad-flow-scripts:latest
+export ORFS_SIF="${ORFS_SIF:-${HOME}/singularity/orfs.sif}"
+
 # ── Container runtime ─────────────────────────────────────────────────────────
 # Prefer apptainer (Singularity's successor); fall back to singularity
 if command -v apptainer &>/dev/null; then
