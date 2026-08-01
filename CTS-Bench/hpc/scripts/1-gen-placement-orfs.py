@@ -136,10 +136,16 @@ export RESYNTH_TIMING_RECOVER = 0
         f"REPORTS_DIR={reports_dir} "
         "place"
     )
+    # Bind writable dirs over the container's read-only logs/objects/reports
+    # directories so ORFS synth.sh and OpenROAD write there instead of
+    # failing on the read-only SIF filesystem.
     print(f"Running ORFS placement ({CONTAINER_CMD}) for {design_name} pdk={pdk} tag={tag}")
     result = subprocess.run([
         CONTAINER_CMD, "exec",
         "--bind", f"{CTS_BENCH_ROOT}:{CTS_BENCH_ROOT}",
+        "--bind", f"{logs_dir}:/OpenROAD-flow-scripts/flow/logs",
+        "--bind", f"{objects_dir}:/OpenROAD-flow-scripts/flow/objects",
+        "--bind", f"{reports_dir}:/OpenROAD-flow-scripts/flow/reports",
         ORFS_SIF,
         "bash", "-c", make_cmd,
     ], cwd=run_dir)
