@@ -81,9 +81,10 @@ def run_orfs_placement(
     tag = f"{design_name}_orfs_{pdk[:4]}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     run_dir     = os.path.join(CTS_BENCH_ROOT, "runs", tag)
     results_dir = os.path.join(run_dir, "orfs_results")
+    objects_dir = os.path.join(run_dir, "orfs_objects")   # MUST be outside container
     logs_dir    = os.path.join(run_dir, "orfs_logs")
     reports_dir = os.path.join(run_dir, "orfs_reports")
-    for d in (run_dir, results_dir, logs_dir, reports_dir):
+    for d in (run_dir, results_dir, objects_dir, logs_dir, reports_dir):
         os.makedirs(d, exist_ok=True)
 
     # ── SDC (clock period in PDK-native units) ────────────────────────────
@@ -123,12 +124,14 @@ export TNS_END_PERCENT   = 100
 export RESYNTH_TIMING_RECOVER = 0
 """)
 
-    # Source ORFS env.sh first so Yosys/OpenROAD binaries are in PATH
+    # Source ORFS env.sh so Yosys/OpenROAD are in PATH.
+    # OBJECTS_DIR must point outside the read-only container SIF.
     make_cmd = (
         "source /OpenROAD-flow-scripts/env.sh && "
-        f"make -C /OpenROAD-flow-scripts/flow "
+        f"make -C /OpenROAD-flow-scripts/flow -j8 "
         f"DESIGN_CONFIG={config_mk} "
         f"RESULTS_DIR={results_dir} "
+        f"OBJECTS_DIR={objects_dir} "
         f"LOGS_DIR={logs_dir} "
         f"REPORTS_DIR={reports_dir} "
         "place"
