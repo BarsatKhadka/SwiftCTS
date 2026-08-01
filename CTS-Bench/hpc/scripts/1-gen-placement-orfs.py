@@ -131,7 +131,7 @@ export RESYNTH_TIMING_RECOVER = 0
         f"RESULTS_DIR={results_dir} "
         f"LOGS_DIR={logs_dir} "
         f"REPORTS_DIR={reports_dir} "
-        "3_place"
+        "place"
     )
     print(f"Running ORFS placement ({CONTAINER_CMD}) for {design_name} pdk={pdk} tag={tag}")
     result = subprocess.run([
