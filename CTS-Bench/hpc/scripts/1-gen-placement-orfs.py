@@ -124,17 +124,26 @@ export TNS_END_PERCENT   = 100
 export RESYNTH_TIMING_RECOVER = 0
 """)
 
-    # Source ORFS env.sh so Yosys/OpenROAD are in PATH.
-    # OBJECTS_DIR must point outside the read-only container SIF.
-    make_cmd = (
-        "source /OpenROAD-flow-scripts/env.sh && "
-        f"make -C /OpenROAD-flow-scripts/flow -j8 "
+    # Run synth → floorplan → place as separate make invocations.
+    # This avoids the "No rule for 2_1_floorplan.sdc" error: that file is
+    # only created as a side-effect inside the floorplan target's
+    # $(UNSET_AND_MAKE) sub-recipe (not as an explicit make rule), so jumping
+    # straight to `make place` fails dependency resolution.  Running
+    # `make floorplan` first lets ORFS create the file via its internal recipe;
+    # by the time `make place` runs, the file already exists on disk.
+    make_vars = (
+        f"-C /OpenROAD-flow-scripts/flow -j8 "
         f"DESIGN_CONFIG={config_mk} "
         f"RESULTS_DIR={results_dir} "
         f"OBJECTS_DIR={objects_dir} "
         f"LOGS_DIR={logs_dir} "
-        f"REPORTS_DIR={reports_dir} "
-        "place"
+        f"REPORTS_DIR={reports_dir}"
+    )
+    make_cmd = (
+        "source /OpenROAD-flow-scripts/env.sh && "
+        f"make {make_vars} synth && "
+        f"make {make_vars} floorplan && "
+        f"make {make_vars} place"
     )
     # Bind writable dirs over the container's read-only logs/objects/reports
     # directories so ORFS synth.sh and OpenROAD write there instead of
